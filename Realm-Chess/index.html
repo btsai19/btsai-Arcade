@@ -517,18 +517,27 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
         max-width: 80px;
         opacity: 1;
     }
-    /* Mobile: just the arrow, no label, small circle in top-left */
+    /* Mobile: bottom center pill */
     @media (hover: none) and (pointer: coarse) {
         #back-to-grid {
-            top: 16px;
-            left: 16px;
-            transform: none;
-            border-radius: 50%;
-            border: 1px solid rgba(255,255,255,0.12);
-            padding: 10px;
-            gap: 0;
+            top: auto;
+            bottom: 20px;
+            left: 50%;
+            right: auto;
+            transform: translateX(-50%);
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-left: 1px solid rgba(255,255,255,0.1);
+            padding: 8px 20px 8px 14px;
+            gap: 7px;
+            font-size: 0.52rem;
+            background: rgba(18,18,18,0.88);
         }
-        #back-label { display: none !important; }
+        #back-label {
+            display: inline-block !important;
+            max-width: 80px !important;
+            opacity: 1 !important;
+        }
     }
 
     </style>
