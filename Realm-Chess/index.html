@@ -1102,6 +1102,99 @@ function goBack() {
 let board=[],turn='white',sel=null,pMoves=[],capW=[],capB=[],over=false;
 let epTarget=null,castle={white:{k:true,q:true},black:{k:true,q:true}};
 let lastFrom=null,lastTo=null,aiThinking=false,diffDepth=2;
+let halfMoveClock=0;          // for 50-move rule (resets on pawn move or capture)
+let positionHistory=[];       // for threefold repetition
+
+// ── Draw / hopeless detection ─────────────────────────────────
+
+// Returns a string key representing the current board position (for repetition)
+function boardKey(){
+  let k='';
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+    const p=board[r][c];
+    k+=p?p.c[0]+p.t:'.';
+  }
+  return k+'|'+turn+'|'+
+    (castle.white.k?'1':'0')+(castle.white.q?'1':'0')+
+    (castle.black.k?'1':'0')+(castle.black.q?'1':'0')+'|'+
+    (epTarget?epTarget.join(','):'x');
+}
+
+// Collect all pieces on the board
+function allPieces(){
+  const ps=[];
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++)if(board[r][c])ps.push(board[r][c]);
+  return ps;
+}
+
+// Insufficient mating material — neither side can force checkmate
+function isInsufficientMaterial(){
+  const pieces=allPieces();
+  const w=pieces.filter(p=>p.c==='white');
+  const b=pieces.filter(p=>p.c==='black');
+  const types=p=>p.map(x=>x.t).sort().join('');
+
+  // K vs K
+  if(w.length===1&&b.length===1) return true;
+
+  // K+B vs K  or  K+N vs K  (either side)
+  const isMinor=arr=>arr.length===2&&arr[0].t==='K'&&(arr[1].t==='B'||arr[1].t==='N');
+  if(isMinor(w)&&b.length===1) return true;
+  if(isMinor(b)&&w.length===1) return true;
+
+  // K+B vs K+B (same coloured bishops — simplified: just K+B vs K+B)
+  if(w.length===2&&b.length===2&&types(w)==='BK'&&types(b)==='BK') return true;
+
+  return false;
+}
+
+// Only kings remaining
+function onlyKings(){
+  return allPieces().every(p=>p.t==='K');
+}
+
+// One side has only a king, the other has meaningful material (not just a king)
+// Returns { loser, reason } or null
+function isHopeless(){
+  const pieces=allPieces();
+  const wPieces=pieces.filter(p=>p.c==='white');
+  const bPieces=pieces.filter(p=>p.c==='black');
+
+  // Lone king vs any real material (at least a rook or queen, or 2+ minor pieces)
+  function hasMatingForce(arr){
+    const nonKing=arr.filter(p=>p.t!=='K');
+    if(nonKing.some(p=>p.t==='Q'||p.t==='R'||p.t==='P')) return true;
+    if(nonKing.filter(p=>p.t==='B'||p.t==='N').length>=2) return true;
+    return false;
+  }
+
+  if(wPieces.length===1&&hasMatingForce(bPieces)) return {loser:'white',reason:'Lone King — no hope of survival'};
+  if(bPieces.length===1&&hasMatingForce(wPieces)) return {loser:'black',reason:'Lone King — no hope of survival'};
+  return null;
+}
+
+// Threefold repetition
+function isThreefoldRepetition(){
+  const key=boardKey();
+  const count=positionHistory.filter(k=>k===key).length;
+  return count>=2; // current position will be added making it 3
+}
+
+// Check all automatic draw / end conditions after every move
+// Returns { type, reason } or null
+function checkSpecialEndConditions(){
+  if(onlyKings())
+    return {type:'draw', reason:'Only kings remain — neither can checkmate'};
+  if(isInsufficientMaterial())
+    return {type:'draw', reason:'Insufficient material to checkmate'};
+  if(halfMoveClock>=100) // 100 half-moves = 50 full moves
+    return {type:'draw', reason:'50-move rule — no captures or pawn moves'};
+  if(isThreefoldRepetition())
+    return {type:'draw', reason:'Threefold repetition'};
+  const hopeless=isHopeless();
+  if(hopeless) return {type:'hopeless', loser:hopeless.loser, reason:hopeless.reason};
+  return null;
+}
 
 const VAL={K:20000,Q:900,R:500,B:330,N:320,P:100};
 const PST={
@@ -1191,6 +1284,7 @@ function resetGame(){
   turn='white';sel=null;pMoves=[];capW=[];capB=[];over=false;
   epTarget=null;castle={white:{k:true,q:true},black:{k:true,q:true}};
   lastFrom=null;lastTo=null;aiThinking=false;trails=[];vcMoveCount=0;
+  halfMoveClock=0;positionHistory=[];
   initBoard();render();
   setStat(gameMode==='2p'?'Player 1 — White':'Your Turn','your');
   updCards();
@@ -1461,6 +1555,11 @@ function execMove(tr,tc,sp,who){
   // start timer on first move
   if (!timerActive && !over) startTimer();
 
+  // 50-move rule clock: resets on pawn move or capture
+  if(piece.t==='P'||cap) halfMoveClock=0; else halfMoveClock++;
+  // Record position for threefold repetition (record AFTER move applied)
+  positionHistory.push(boardKey());
+
   // sound
   if(cap) playCapture();
   else (PIECE_SOUNDS[piece.t] || PIECE_SOUNDS.P)();
@@ -1489,6 +1588,38 @@ function execMove(tr,tc,sp,who){
 
 function finishTurn(who){
   const opp=turn==='white'?'black':'white';turn=opp;updCards();
+
+  // ── Check special draw / hopeless conditions first ──
+  const special=checkSpecialEndConditions();
+  if(special){
+    stopTimer();over=true;
+    render();lastTo=null;
+    if(special.type==='draw'){
+      setStat('Draw','sm');
+      showVictory({type:'draw', winner:'Draw', reason:special.reason});
+    } else {
+      // hopeless — lone king side loses
+      const loser=special.loser;
+      const winner=loser==='white'?'black':'white';
+      if(gameMode==='2p'){
+        const wName=winner==='white'?'Player 1':'Player 2';
+        const lName=winner==='white'?'Player 2':'Player 1';
+        setStat(`${wName} wins!`,'cm');
+        showVictory({type:'win',winner:`${wName} Wins`,reason:special.reason,
+          winnerCap:winner==='white'?capW:capB,winnerTime:formatTime(timers[winner])});
+      } else {
+        const youWon=winner==='white';
+        setStat(youWon?'Victory!':'Shadow wins!','cm');
+        showVictory({type:youWon?'win':'lose',
+          winner:youWon?'Victory':'Defeated',
+          reason:special.reason,
+          winnerCap:youWon?capW:capB,
+          winnerTime:formatTime(timers[youWon?'white':'black'])});
+      }
+    }
+    return;
+  }
+
   const chk=inChkG(opp),has=anyMoveG(opp);
   if(!has){
     stopTimer();over=true;
