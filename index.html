@@ -829,11 +829,37 @@ function animCount(el, target, dur, pad) {
         else { el.textContent = String(target).padStart(pad, '0'); el.classList.add('loaded'); }
     })(s);
 }
-let visits = parseInt(localStorage.getItem('btsai_v') || '0') + 1;
-localStorage.setItem('btsai_v', visits);
-setTimeout(() => {
-    animCount(document.getElementById('cGames'),  2,   1200, 2);
-    animCount(document.getElementById('cVisits'), Math.min(visits, 999), 1600, 3);
+// Global session counter via Supabase
+const SUPA_URL = 'https://kepbwovgwvsfycmvsztu.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcGJ3b3Znd3ZzZnljbXZzenR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0OTkxNDMsImV4cCI6MjA5MDA3NTE0M30.cAS58qI-4N1Ddgrd4tqIxwjOj_u5l2QL5yNmXQVRr7c';
+const SUPA_HEADERS = {
+    'apikey': SUPA_KEY,
+    'Authorization': 'Bearer ' + SUPA_KEY,
+    'Content-Type': 'application/json'
+};
+
+async function incrementSessions() {
+    try {
+        // Get current value
+        const res  = await fetch(`${SUPA_URL}/rest/v1/meta?key=eq.sessions&select=value`, { headers: SUPA_HEADERS });
+        const data = await res.json();
+        const current = data[0]?.value || 0;
+        const next = current + 1;
+        // Update
+        await fetch(`${SUPA_URL}/rest/v1/meta?key=eq.sessions`, {
+            method: 'PATCH',
+            headers: { ...SUPA_HEADERS, 'Prefer': 'return=minimal' },
+            body: JSON.stringify({ value: next })
+        });
+        return next;
+    } catch(e) { return null; }
+}
+
+setTimeout(async () => {
+    animCount(document.getElementById('cGames'), 2, 1200, 2);
+    const globalSessions = await incrementSessions();
+    const display = globalSessions !== null ? Math.min(globalSessions, 9999) : 0;
+    animCount(document.getElementById('cVisits'), display, 1600, display > 999 ? 4 : 3);
 }, 2500);
 
 // ── NOW PLAYING ──
