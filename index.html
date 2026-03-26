@@ -43,7 +43,7 @@
             background: var(--bg);
             color: var(--text);
             font-family: 'Outfit', sans-serif;
-            font-weight: 300; 
+            font-weight: 300;
             min-height: 100vh;
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
@@ -391,41 +391,7 @@
         .lb-head { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
         .lb-head p { font-size: 0.57rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--mid); white-space: nowrap; }
         .lb-head::after { content:''; flex:1; height:1px; background:var(--border); }
-        .lb-top-row {
-            display: flex; align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap; gap: 12px;
-            margin-bottom: 14px;
-        }
-        .lb-tabs { display: flex; gap: 4px; }
-        .lb-name-wrap {
-            display: flex; align-items: center; gap: 8px;
-        }
-        .lb-name-label {
-            font-size: 0.56rem; letter-spacing: 0.16em;
-            text-transform: uppercase; color: var(--mid);
-            white-space: nowrap;
-        }
-        .lb-name-input {
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.7rem; color: var(--text);
-            background: var(--card); border: 1px solid var(--border-h);
-            border-radius: 4px; padding: 5px 10px;
-            outline: none; width: 130px;
-            transition: border-color 0.2s;
-        }
-        .lb-name-input:focus { border-color: var(--mid); }
-        .lb-name-input::placeholder { color: var(--dim); }
-        .lb-name-save {
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.56rem; letter-spacing: 0.16em;
-            text-transform: uppercase; color: var(--text);
-            background: var(--card); border: 1px solid var(--border-h);
-            border-radius: 4px; padding: 6px 12px;
-            cursor: none; transition: all 0.2s;
-        }
-        .lb-name-save:hover { background: var(--card-h); border-color: var(--text); }
-        .lb-name-save.saved { color: var(--green); border-color: var(--green); }
+        .lb-tabs { display: flex; gap: 4px; margin-bottom: 14px; }
         .lb-tab { font-family: 'Outfit', sans-serif; font-size: 0.58rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--mid); padding: 6px 15px; border-radius: 4px; border: 1px solid var(--border); background: transparent; cursor: none; transition: all 0.2s; }
         .lb-tab:hover, .lb-tab.active { background: var(--card); color: var(--text); border-color: var(--border-h); }
         .lb-box { background: var(--card); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
@@ -681,17 +647,10 @@
 
     <div class="lb-wrap">
         <div class="lb-head"><p>Global Leaderboard</p></div>
-        <div class="lb-top-row">
-            <div class="lb-tabs">
-                <button class="lb-tab active" data-g="all">All Games</button>
-                <button class="lb-tab" data-g="Realm Chess">Realm Chess</button>
-                <button class="lb-tab" data-g="Cosmic Blackjack">Cosmic Blackjack</button>
-            </div>
-            <div class="lb-name-wrap">
-                <span class="lb-name-label">Your name on the board:</span>
-                <input class="lb-name-input" id="lbNameInput" type="text" maxlength="18" placeholder="Enter name…" />
-                <button class="lb-name-save" id="lbNameSave">Save</button>
-            </div>
+        <div class="lb-tabs">
+            <button class="lb-tab active" data-g="all">All Games</button>
+            <button class="lb-tab" data-g="Realm Chess">Realm Chess</button>
+            <button class="lb-tab" data-g="Cosmic Blackjack">Cosmic Blackjack</button>
         </div>
         <div class="lb-box" id="lbBox">
             <div class="lb-load">Loading scores...</div>
@@ -1030,17 +989,28 @@ setTimeout(async () => {
     animCount(document.getElementById('cVisits'), display, 1600, display > 999 ? 4 : 3);
 }, 2500);
 
-// ── NOW PLAYING ──
+// ── NOW PLAYING — polls Supabase for live game activity ──
 const nowPill = document.getElementById('nowPill');
 const nowText = document.getElementById('nowText');
-function checkPlaying() {
-    const g = localStorage.getItem('btsai_playing');
-    if (g) { nowText.textContent = g; nowPill.classList.add('on'); }
-    else    { nowPill.classList.remove('on'); }
+
+async function checkPlayingGlobal() {
+    try {
+        const res  = await fetch(`${SUPA_URL}/rest/v1/meta?key=eq.active_game&select=value`, { headers: SUPA_HEADERS });
+        const data = await res.json();
+        const game = data[0]?.value;
+        if (game && game !== 'none') {
+            nowText.textContent = game;
+            nowPill.classList.add('on');
+        } else {
+            nowPill.classList.remove('on');
+        }
+    } catch {
+        nowPill.classList.remove('on');
+    }
 }
-checkPlaying();
-window.addEventListener('focus', checkPlaying);
-setInterval(checkPlaying, 3000);
+
+checkPlayingGlobal();
+setInterval(checkPlayingGlobal, 5000);
 
 // ── PAGE TRANSITION ──
 const overlay = document.getElementById('overlay');
@@ -1048,7 +1018,7 @@ document.querySelectorAll('.card:not(.locked)').forEach(card => {
     card.addEventListener('click', e => {
         e.preventDefault();
         const href = card.getAttribute('href');
-        localStorage.setItem('btsai_playing', card.querySelector('.card-name').textContent);
+        // Supabase tracks active game via game files
         overlay.style.transition = 'transform 0.5s cubic-bezier(0.76,0,0.24,1)';
         overlay.style.transformOrigin = 'bottom';
         overlay.style.transform = 'scaleY(1)';
@@ -1056,7 +1026,7 @@ document.querySelectorAll('.card:not(.locked)').forEach(card => {
     });
 });
 window.addEventListener('pageshow', () => {
-    localStorage.removeItem('btsai_playing'); checkPlaying();
+    checkPlayingGlobal();
     overlay.style.transition = 'none';
     overlay.style.transformOrigin = 'top';
     overlay.style.transform = 'scaleY(1)';
@@ -1146,21 +1116,7 @@ document.querySelectorAll('.lb-tab').forEach(tab => {
 
 fetchLB();
 
-// ── PLAYER NAME ──
-const nameInput = document.getElementById('lbNameInput');
-const nameSave  = document.getElementById('lbNameSave');
-const savedName = localStorage.getItem('btsai_player_name');
-if (savedName) nameInput.value = savedName;
 
-nameSave.addEventListener('click', () => {
-    const val = nameInput.value.trim();
-    if (!val) return;
-    localStorage.setItem('btsai_player_name', val);
-    nameSave.textContent = 'Saved ✓';
-    nameSave.classList.add('saved');
-    setTimeout(() => { nameSave.textContent = 'Save'; nameSave.classList.remove('saved'); }, 2000);
-});
-nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') nameSave.click(); });
 </script>
 </body>
 </html>
