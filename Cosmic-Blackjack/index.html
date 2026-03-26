@@ -1328,43 +1328,77 @@ body {
   .chip-modal-preset { padding: 5px 10px; font-size: 12px; }
 }
 
-    /* ── BACK TO GRID BUTTON ── */
+    /* ── BACK TO GRID — arrow tab, label slides on hover ── */
     #back-to-grid {
         position: fixed;
-        top: 20px; left: 20px;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
         z-index: 99999;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 0px;
         font-family: 'Outfit', 'Segoe UI', sans-serif;
-        font-size: 0.6rem;
+        font-size: 0.58rem;
         font-weight: 400;
-        letter-spacing: 0.2em;
+        letter-spacing: 0.18em;
         text-transform: uppercase;
-        color: rgba(232,230,225,0.55);
-        background: rgba(22,22,22,0.75);
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 20px;
-        padding: 8px 16px 8px 12px;
+        color: rgba(232,230,225,0.75);
+        background: rgba(28,28,28,0.92);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-left: none;
+        border-radius: 0 20px 20px 0;
+        padding: 10px 10px 10px 8px;
         cursor: pointer;
         text-decoration: none;
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        transition: color 0.2s, border-color 0.2s, background 0.2s;
+        overflow: hidden;
+        transition: color 0.25s ease, background 0.25s ease,
+                    padding 0.3s cubic-bezier(0.22,1,0.36,1),
+                    gap 0.3s cubic-bezier(0.22,1,0.36,1);
+        white-space: nowrap;
     }
     #back-to-grid:hover {
-        color: rgba(232,230,225,0.95);
-        border-color: rgba(255,255,255,0.18);
-        background: rgba(32,32,32,0.9);
+        color: rgba(232,230,225,1);
+        background: rgba(40,40,40,0.96);
+        padding: 10px 16px 10px 10px;
+        gap: 8px;
     }
     #back-to-grid svg {
         width: 12px; height: 12px;
         stroke: currentColor;
         fill: none;
-        stroke-width: 2;
+        stroke-width: 2.5;
         stroke-linecap: round;
         stroke-linejoin: round;
         flex-shrink: 0;
+    }
+    /* Label — zero width by default, expands on hover */
+    #back-label {
+        display: inline-block;
+        max-width: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition: max-width 0.35s cubic-bezier(0.22,1,0.36,1),
+                    opacity 0.25s ease;
+        vertical-align: middle;
+    }
+    #back-to-grid:hover #back-label {
+        max-width: 80px;
+        opacity: 1;
+    }
+    /* Mobile: always show full label */
+    @media (hover: none) and (pointer: coarse) {
+        #back-to-grid {
+            padding: 9px 14px 9px 10px;
+            gap: 7px;
+            font-size: 0.52rem;
+        }
+        #back-label {
+            max-width: 80px !important;
+            opacity: 1 !important;
+        }
     }
 
     </style>
@@ -1372,7 +1406,7 @@ body {
 <body>
     <a id="back-to-grid" href="../index.html">
         <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-        The Grid
+        <span id="back-label">The Grid</span>
     </a>
 
 
