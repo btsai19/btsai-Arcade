@@ -1693,6 +1693,23 @@ function animateVC() {
 }
 
 function showVictory(opts) {
+
+// ── GLOBAL LEADERBOARD ──
+async function submitScore(name, game, score) {
+    try {
+        await fetch('https://kepbwovgwvsfycmvsztu.supabase.co/rest/v1/scores', {
+            method: 'POST',
+            headers: {
+                'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcGJ3b3Znd3ZzZnljbXZzenR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0OTkxNDMsImV4cCI6MjA5MDA3NTE0M30.cAS58qI-4N1Ddgrd4tqIxwjOj_u5l2QL5yNmXQVRr7c',
+                'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcGJ3b3Znd3ZzZnljbXZzenR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0OTkxNDMsImV4cCI6MjA5MDA3NTE0M30.cAS58qI-4N1Ddgrd4tqIxwjOj_u5l2QL5yNmXQVRr7c',
+                'Content-Type': 'application/json',
+                'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({ name, game, score, date: new Date().toISOString().split('T')[0] })
+        });
+    } catch(e) { console.warn('Score submit failed:', e); }
+}
+
   // opts: { type:'win'|'lose'|'draw', winner, reason, winnerCap, winnerTime }
   const { type, winner, reason, winnerCap, winnerTime } = opts;
 
@@ -1723,6 +1740,13 @@ function showVictory(opts) {
   iconsEl.innerHTML = (winnerCap || []).map(p =>
     `<span class="vc-cap-ico">${getSVG(p.t, false)}</span>`
   ).join('');
+
+  // Submit to global leaderboard on win
+  if (type === 'win') {
+      const playerName = winner.replace(' Wins','').replace('Victory','Player');
+      const captureScore = (winnerCap || []).length;
+      submitScore(playerName, 'Realm Chess', captureScore);
+  }
 
   // Show screen
   document.getElementById('victory-screen').classList.add('show');
