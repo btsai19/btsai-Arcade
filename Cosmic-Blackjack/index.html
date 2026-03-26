@@ -1327,98 +1327,9 @@ body {
   .chip-modal-player { font-size: 15px; }
   .chip-modal-preset { padding: 5px 10px; font-size: 12px; }
 }
-
-    /* ── BACK TO GRID — arrow tab, label slides on hover ── */
-    #back-to-grid {
-        position: fixed;
-        top: 50%;
-        left: 0;
-        transform: translateY(-50%);
-        z-index: 99999;
-        display: flex;
-        align-items: center;
-        gap: 0px;
-        font-family: 'Outfit', 'Segoe UI', sans-serif;
-        font-size: 0.58rem;
-        font-weight: 400;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        color: rgba(232,230,225,0.75);
-        background: rgba(28,28,28,0.92);
-        border: 1px solid rgba(255,255,255,0.1);
-        border-left: none;
-        border-radius: 0 20px 20px 0;
-        padding: 10px 10px 10px 8px;
-        cursor: pointer;
-        text-decoration: none;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        overflow: hidden;
-        transition: color 0.25s ease, background 0.25s ease,
-                    padding 0.3s cubic-bezier(0.22,1,0.36,1),
-                    gap 0.3s cubic-bezier(0.22,1,0.36,1);
-        white-space: nowrap;
-    }
-    #back-to-grid:hover {
-        color: rgba(232,230,225,1);
-        background: rgba(40,40,40,0.96);
-        padding: 10px 16px 10px 10px;
-        gap: 8px;
-    }
-    #back-to-grid svg {
-        width: 12px; height: 12px;
-        stroke: currentColor;
-        fill: none;
-        stroke-width: 2.5;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-        flex-shrink: 0;
-    }
-    /* Label — zero width by default, expands on hover */
-    #back-label {
-        display: inline-block;
-        max-width: 0;
-        overflow: hidden;
-        opacity: 0;
-        transition: max-width 0.35s cubic-bezier(0.22,1,0.36,1),
-                    opacity 0.25s ease;
-        vertical-align: middle;
-    }
-    #back-to-grid:hover #back-label {
-        max-width: 80px;
-        opacity: 1;
-    }
-    /* Mobile: bottom center pill */
-    @media (hover: none) and (pointer: coarse) {
-        #back-to-grid {
-            top: auto;
-            bottom: 20px;
-            left: 50%;
-            right: auto;
-            transform: translateX(-50%);
-            border-radius: 30px;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-left: 1px solid rgba(255,255,255,0.1);
-            padding: 8px 20px 8px 14px;
-            gap: 7px;
-            font-size: 0.52rem;
-            background: rgba(18,18,18,0.88);
-        }
-        #back-label {
-            display: inline-block !important;
-            max-width: 80px !important;
-            opacity: 1 !important;
-        }
-    }
-
-    </style>
+</style>
 </head>
 <body>
-    <a id="back-to-grid" href="../index.html">
-        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-        <span id="back-label">The Grid</span>
-    </a>
-
 
 <!-- Starfield -->
 <div id="starfield">
@@ -1492,6 +1403,32 @@ body {
       <div class="phase-indicator">Phase: <b id="phase-label">BETTING</b></div>
       <button class="next-btn" id="next-btn">DEAL CARDS</button>
     </div>
+  </div>
+</div>
+
+<!-- Solo Bet Popup -->
+<div id="solo-bet-overlay" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(5,10,22,0.97);backdrop-filter:blur(20px);z-index:600;opacity:0;pointer-events:none;transition:opacity 0.3s;">
+  <div class="pass-card">
+    <div class="pass-icon">🎰</div>
+    <div class="pass-eyebrow">Round <span id="solo-bet-round">1</span></div>
+    <div class="pass-name" style="font-size:22px;letter-spacing:3px;">PLACE YOUR BET</div>
+    <div class="pass-divider"></div>
+    <div class="pass-bet-section" style="display:flex;">
+      <div class="pass-bet-label">Your Bet</div>
+      <div class="pass-bet-amount" id="solo-bet-display">⬡ 0</div>
+      <div class="pass-chip-row">
+        <button class="chip-btn c5"   onclick="soloAddBet(5)"   touch-action="manipulation">5</button>
+        <button class="chip-btn c10"  onclick="soloAddBet(10)"  touch-action="manipulation">10</button>
+        <button class="chip-btn c25"  onclick="soloAddBet(25)"  touch-action="manipulation">25</button>
+        <button class="chip-btn c50"  onclick="soloAddBet(50)"  touch-action="manipulation">50</button>
+        <button class="chip-btn c100" onclick="soloAddBet(100)" touch-action="manipulation">100</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:11px;color:var(--text-dim);font-family:'Rajdhani',sans-serif;letter-spacing:1px;">Balance: <b id="solo-bet-balance" style="color:var(--gold);font-family:'Orbitron',monospace;">0</b></span>
+        <button class="pass-bet-clear" onclick="soloClearBet()">CLEAR</button>
+      </div>
+    </div>
+    <button class="btn-reveal" id="solo-bet-confirm">DEAL CARDS →</button>
   </div>
 </div>
 
@@ -1998,21 +1935,8 @@ function renderPlayerRow(p, i, container) {
 
   // Actions
   let actionsHTML = '';
-  if (G.phase === 'betting' && !isPrivacy()) {
-    // Solo only — multiplayer bets via pass screen
-    actionsHTML = `
-      <div class="bet-row">
-        <button class="chip-btn c5"  onclick="addBet(${i},5)">5</button>
-        <button class="chip-btn c10" onclick="addBet(${i},10)">10</button>
-        <button class="chip-btn c25" onclick="addBet(${i},25)">25</button>
-        <button class="chip-btn c50" onclick="addBet(${i},50)">50</button>
-        <button class="chip-btn c100" onclick="addBet(${i},100)">100</button>
-      </div>
-      <div class="current-bet-display">Bet: <b>${p.bet}</b> <button style="background:none;border:none;color:var(--text-dim);font-size:10px;cursor:pointer;letter-spacing:1px;" onclick="clearBet(${i})">CLEAR</button></div>
-    `;
-  } else if (isAwaiting) {
-    // Player has stood/busted/doubled — show their result then pass button
-    const passLabel = isPrivacy() ? `PASS DEVICE →` : `NEXT PLAYER →`;
+  if (isAwaiting) {
+    const passLabel = isPrivacy() ? `PASS DEVICE →` : `DONE →`;
     actionsHTML = `<div class="action-btns">
       <button class="act-btn pass-turn" onclick="confirmPassTurn(${i})">${passLabel}</button>
     </div>`;
@@ -2050,11 +1974,19 @@ function setPhase(phase) {
   phaseLabel.textContent = labels[phase] || phase.toUpperCase();
 
   if (phase === 'betting') {
-    nextBtn.textContent = 'DEAL CARDS';
-    nextBtn.disabled = isPrivacy(); // hidden in multiplayer — deal triggered by pass screens
-    nextBtn.style.opacity = isPrivacy() ? '0' : '1';
-    nextBtn.style.pointerEvents = isPrivacy() ? 'none' : 'auto';
-    nextBtn.onclick = dealRound;
+    if (isPrivacy()) {
+      // Multiplayer — DEAL CARDS button invisible, flow handled by pass screens
+      nextBtn.style.opacity = '0';
+      nextBtn.style.pointerEvents = 'none';
+      nextBtn.disabled = true;
+    } else {
+      // Solo — DEAL CARDS opens the bet popup
+      nextBtn.textContent = 'PLACE BET & DEAL';
+      nextBtn.style.opacity = '1';
+      nextBtn.style.pointerEvents = 'auto';
+      nextBtn.disabled = false;
+      nextBtn.onclick = openSoloBetPopup;
+    }
   } else if (phase === 'playing') {
     nextBtn.textContent = 'SKIP TO DEALER';
     nextBtn.disabled = false;
@@ -2074,7 +2006,7 @@ function dealRound() {
     G.players.forEach(p => { p.bet = 0; });
     _startDeal();
   } else {
-    if (!G.players[0].bet) { toast('Place your bet first!'); return; }
+    // Solo: bet is already set by popup before this is called
     _startDeal();
   }
 }
@@ -2300,23 +2232,6 @@ window.playerSplit = function(i) {
   renderPlayers();
 };
 
-
-// ── GLOBAL LEADERBOARD ──
-async function submitScore(name, game, score) {
-    try {
-        await fetch('https://kepbwovgwvsfycmvsztu.supabase.co/rest/v1/scores', {
-            method: 'POST',
-            headers: {
-                'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcGJ3b3Znd3ZzZnljbXZzenR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0OTkxNDMsImV4cCI6MjA5MDA3NTE0M30.cAS58qI-4N1Ddgrd4tqIxwjOj_u5l2QL5yNmXQVRr7c',
-                'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcGJ3b3Znd3ZzZnljbXZzenR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0OTkxNDMsImV4cCI6MjA5MDA3NTE0M30.cAS58qI-4N1Ddgrd4tqIxwjOj_u5l2QL5yNmXQVRr7c',
-                'Content-Type': 'application/json',
-                'Prefer': 'return=minimal'
-            },
-            body: JSON.stringify({ name, game, score, date: new Date().toISOString().split('T')[0] })
-        });
-    } catch(e) { console.warn('Score submit failed:', e); }
-}
-
 // ── END GAME ──
 function showEndGame() {
   const overlay = document.getElementById('endgame-overlay');
@@ -2361,10 +2276,6 @@ function showEndGame() {
     `;
     statsEl.appendChild(card);
   });
-
-  // Submit top player score to global leaderboard
-  const topPlayer = sorted[0];
-  submitScore(topPlayer.name, 'Cosmic Blackjack', topPlayer.chips);
 
   overlay.classList.add('show');
 }
@@ -2546,10 +2457,6 @@ function showResults() {
     row.innerHTML = `<span class="rr-name">${p.name}</span><span class="rr-result ${p.result === 'bj-win' ? 'win' : p.result||''}">${resultLabels[p.result] || '—'} &nbsp; ${netStr} chips &nbsp; ⬡${p.chips} total</span>`;
     list.appendChild(row);
   });
-  // Submit top player score to global leaderboard
-  const topPlayer = sorted[0];
-  submitScore(topPlayer.name, 'Cosmic Blackjack', topPlayer.chips);
-
   overlay.classList.add('show');
 }
 
@@ -2574,6 +2481,9 @@ function startNextRound() {
   renderScoreboard();
   if (isPrivacy()) {
     setTimeout(() => dealRound(), 200);
+  } else {
+    // Solo: open bet popup for next round
+    setTimeout(() => openSoloBetPopup(), 200);
   }
 }
 
@@ -2613,6 +2523,8 @@ document.getElementById('btn-launch').onclick = () => {
   renderPlayers();
   if (isPrivacy()) {
     setTimeout(() => dealRound(), 300);
+  } else {
+    setTimeout(() => openSoloBetPopup(), 300);
   }
 };
 
@@ -2623,6 +2535,49 @@ document.getElementById('btn-back').onclick = () => {
 };
 
 document.getElementById('overlay-next').onclick = startNextRound;
+
+// ── SOLO BET POPUP ──
+let _soloBet = 0;
+
+function openSoloBetPopup() {
+  const p = G.players[0];
+  _soloBet = 0;
+  document.getElementById('solo-bet-round').textContent = G.round;
+  document.getElementById('solo-bet-display').textContent = '⬡ 0';
+  document.getElementById('solo-bet-display').style.color = 'var(--gold)';
+  document.getElementById('solo-bet-balance').textContent = p.chips;
+  const overlay = document.getElementById('solo-bet-overlay');
+  overlay.style.opacity = '1';
+  overlay.style.pointerEvents = 'auto';
+}
+
+window.soloAddBet = function(amount) {
+  const p = G.players[0];
+  const available = p.chips - _soloBet;
+  if (available <= 0) return;
+  _soloBet += Math.min(amount, available);
+  document.getElementById('solo-bet-display').textContent = `⬡ ${_soloBet}`;
+  sfxChip();
+};
+
+window.soloClearBet = function() {
+  _soloBet = 0;
+  document.getElementById('solo-bet-display').textContent = '⬡ 0';
+};
+
+document.getElementById('solo-bet-confirm').onclick = () => {
+  if (_soloBet <= 0) {
+    document.getElementById('solo-bet-display').style.color = 'var(--red)';
+    setTimeout(() => { document.getElementById('solo-bet-display').style.color = 'var(--gold)'; }, 700);
+    return;
+  }
+  G.players[0].bet = _soloBet;
+  _soloBet = 0;
+  const overlay = document.getElementById('solo-bet-overlay');
+  overlay.style.opacity = '0';
+  overlay.style.pointerEvents = 'none';
+  dealRound();
+};
 
 // ── CHIP MODAL ──
 let chipModalTarget = -1;
@@ -2682,4 +2637,4 @@ document.getElementById('sound-toggle').onclick = function() {
 };
 </script>
 </body>
-</html> 
+</html>
