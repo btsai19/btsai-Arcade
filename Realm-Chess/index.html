@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Realm Chess</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@400;700&family=Raleway:wght@300;400;500;600&display=swap');
 :root {
   --bg:#13101E; --lsq:#2A2444; --dsq:#1A1630;
@@ -457,209 +456,9 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .pbtn:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 8px 20px var(--glow)}
 .pbtn svg{width:42px;height:42px;display:block}
 .pbtn .pnm{font-family:'Cinzel',serif;font-size:.4rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
-
-    /* ── BACK TO GRID — arrow tab, label slides on hover ── */
-    #back-to-grid {
-        position: fixed;
-        top: 50%;
-        left: 0;
-        transform: translateY(-50%);
-        z-index: 999999;
-        display: flex;
-        align-items: center;
-        gap: 0px;
-        font-family: 'Outfit', 'Segoe UI', sans-serif;
-        font-size: 0.58rem;
-        font-weight: 400;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        color: rgba(232,230,225,0.75);
-        background: rgba(28,28,28,0.92);
-        border: 1px solid rgba(255,255,255,0.1);
-        border-left: none;
-        border-radius: 0 20px 20px 0;
-        padding: 10px 10px 10px 8px;
-        cursor: pointer;
-        text-decoration: none;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        overflow: hidden;
-        transition: color 0.25s ease, background 0.25s ease,
-                    padding 0.3s cubic-bezier(0.22,1,0.36,1),
-                    gap 0.3s cubic-bezier(0.22,1,0.36,1);
-        white-space: nowrap;
-    }
-    #back-to-grid:hover {
-        color: rgba(232,230,225,1);
-        background: rgba(40,40,40,0.96);
-        padding: 10px 16px 10px 10px;
-        gap: 8px;
-    }
-    #back-to-grid svg {
-        width: 12px; height: 12px;
-        stroke: currentColor;
-        fill: none;
-        stroke-width: 2.5;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-        flex-shrink: 0;
-    }
-    /* Label — zero width by default, expands on hover */
-    #back-label {
-        display: inline-block;
-        max-width: 0;
-        overflow: hidden;
-        opacity: 0;
-        transition: max-width 0.35s cubic-bezier(0.22,1,0.36,1),
-                    opacity 0.25s ease;
-        vertical-align: middle;
-    }
-    #back-to-grid:hover #back-label {
-        max-width: 80px;
-        opacity: 1;
-    }
-    /* Mobile: bottom center pill */
-    @media (hover: none) and (pointer: coarse) {
-        #back-to-grid {
-            top: auto;
-            bottom: 20px;
-            left: 50%;
-            right: auto;
-            transform: translateX(-50%);
-            border-radius: 30px;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-left: 1px solid rgba(255,255,255,0.1);
-            padding: 8px 20px 8px 14px;
-            gap: 7px;
-            font-size: 0.52rem;
-            background: rgba(18,18,18,0.88);
-        }
-        #back-label {
-            display: inline-block !important;
-            max-width: 80px !important;
-            opacity: 1 !important;
-        }
-    }
-
-    
-    /* ── PLAYER NAME MODAL ── */
-    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500&display=swap');
-
-    #name-modal {
-        position: fixed; inset: 0;
-        background: rgba(0,0,0,0.82);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        z-index: 9999999;
-        display: flex; align-items: center; justify-content: center;
-        opacity: 0; transition: opacity 0.35s ease;
-        pointer-events: none;
-    }
-    #name-modal.show { opacity: 1; pointer-events: all; }
-    .nm-box {
-        background: #1c1c1c;
-        border: 1px solid rgba(255,255,255,0.12);
-        border-radius: 6px;
-        padding: 44px 48px 40px;
-        max-width: 380px; width: 92%;
-        transform: translateY(20px);
-        transition: transform 0.45s cubic-bezier(0.22,1,0.36,1);
-        text-align: center;
-    }
-    #name-modal.show .nm-box { transform: translateY(0); }
-    .nm-eyebrow {
-        font-family: 'Outfit', sans-serif;
-        font-size: 0.58rem; letter-spacing: 0.28em;
-        text-transform: uppercase; color: #555;
-        margin-bottom: 16px;
-    }
-    .nm-title {
-        font-family: 'Bebas Neue', sans-serif;
-        font-size: 2.8rem; letter-spacing: 0.05em;
-        color: #e8e6e1; margin-bottom: 4px; line-height: 1;
-    }
-    .nm-title .nm-outline {
-        -webkit-text-stroke: 1.5px rgba(232,230,225,0.3);
-        color: transparent;
-        paint-order: stroke fill;
-    }
-    .nm-sub {
-        font-family: 'Outfit', sans-serif;
-        font-size: 0.75rem; font-weight: 300;
-        color: #5a5a5a; line-height: 1.75;
-        margin-bottom: 32px;
-        letter-spacing: 0.02em;
-    }
-    .nm-input {
-        width: 100%;
-        font-family: 'Outfit', sans-serif;
-        font-size: 0.88rem; font-weight: 400;
-        color: #e8e6e1; background: #141414;
-        border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 4px; padding: 12px 16px;
-        outline: none; text-align: center;
-        letter-spacing: 0.1em;
-        transition: border-color 0.25s;
-        box-sizing: border-box;
-        margin-bottom: 12px;
-    }
-    .nm-input:focus { border-color: rgba(255,255,255,0.35); }
-    .nm-input::placeholder { color: #3a3a3a; letter-spacing: 0.1em; }
-    .nm-btn {
-        width: 100%;
-        font-family: 'Outfit', sans-serif;
-        font-size: 0.7rem; font-weight: 500; letter-spacing: 0.22em;
-        color: #161616; background: #e8e6e1;
-        border: none; border-radius: 4px;
-        padding: 13px 0; cursor: pointer;
-        transition: background 0.2s, transform 0.15s;
-    }
-    .nm-btn:hover { background: #ffffff; transform: translateY(-1px); }
-    .nm-divider {
-        display: flex; align-items: center; gap: 12px;
-        margin: 14px 0 0;
-    }
-    .nm-divider::before, .nm-divider::after {
-        content: ''; flex: 1; height: 1px;
-        background: rgba(255,255,255,0.07);
-    }
-    .nm-divider span {
-        font-family: 'Outfit', sans-serif;
-        font-size: 0.52rem; letter-spacing: 0.16em;
-        text-transform: uppercase; color: #3a3a3a;
-    }
-    .nm-skip {
-        display: block; margin-top: 10px;
-        font-family: 'Outfit', sans-serif;
-        font-size: 0.58rem; letter-spacing: 0.16em;
-        text-transform: uppercase; color: #3e3e3e;
-        cursor: pointer; transition: color 0.2s;
-        background: none; border: none; width: 100%;
-        padding: 6px 0;
-    }
-    .nm-skip:hover { color: #666; }
-
-    </style>
+</style>
 </head>
 <body>
-    <!-- Player Name Modal -->
-    <div id="name-modal">
-        <div class="nm-box">
-            <p class="nm-eyebrow">The Grid · Leaderboard</p>
-            <h2 class="nm-title">ENTER YOUR <span class="nm-outline">NAME</span></h2>
-            <p class="nm-sub">Your name will appear on the global leaderboard when you finish a game.</p>
-            <input class="nm-input" id="nm-input" type="text" maxlength="18" placeholder="Your name…" autocomplete="off" />
-            <button class="nm-btn" id="nm-confirm">LET'S PLAY</button>
-            <div class="nm-divider"><span>or</span></div>
-            <button class="nm-skip" id="nm-skip">Skip — play as Guest</button>
-        </div>
-    </div>
-
-    <a id="back-to-grid" href="../index.html">
-        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-        <span id="back-label">The Grid</span>
-    </a>
-
 <canvas id="trail-canvas"></canvas>
 <div id="drag-ghost"></div>
 <!-- Ensures dark bg even in sandboxed iframes / mobile browsers -->
@@ -1674,8 +1473,14 @@ function execMove(tr,tc,sp,who){
 
   const isPromo=piece.t==='P'&&tr===(piece.c==='white'?0:7);
   if(isPromo){
-    render();
-    showPromo(piece.c,tr,tc,who);
+    if(who==='ai'){
+      // AI always promotes to Queen automatically
+      board[tr][tc]={t:'Q',c:piece.c};
+      finishTurn(who);
+    } else {
+      render();
+      showPromo(piece.c,tr,tc,who);
+    }
     return;
   }
 
@@ -1894,23 +1699,6 @@ function animateVC() {
 }
 
 function showVictory(opts) {
-
-// ── GLOBAL LEADERBOARD ──
-async function submitScore(name, game, score) {
-    try {
-        await fetch('https://kepbwovgwvsfycmvsztu.supabase.co/rest/v1/scores', {
-            method: 'POST',
-            headers: {
-                'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcGJ3b3Znd3ZzZnljbXZzenR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0OTkxNDMsImV4cCI6MjA5MDA3NTE0M30.cAS58qI-4N1Ddgrd4tqIxwjOj_u5l2QL5yNmXQVRr7c',
-                'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcGJ3b3Znd3ZzZnljbXZzenR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0OTkxNDMsImV4cCI6MjA5MDA3NTE0M30.cAS58qI-4N1Ddgrd4tqIxwjOj_u5l2QL5yNmXQVRr7c',
-                'Content-Type': 'application/json',
-                'Prefer': 'return=minimal'
-            },
-            body: JSON.stringify({ name, game, score, date: new Date().toISOString().split('T')[0] })
-        });
-    } catch(e) { console.warn('Score submit failed:', e); }
-}
-
   // opts: { type:'win'|'lose'|'draw', winner, reason, winnerCap, winnerTime }
   const { type, winner, reason, winnerCap, winnerTime } = opts;
 
@@ -1941,14 +1729,6 @@ async function submitScore(name, game, score) {
   iconsEl.innerHTML = (winnerCap || []).map(p =>
     `<span class="vc-cap-ico">${getSVG(p.t, false)}</span>`
   ).join('');
-
-  // Submit to global leaderboard on win
-  if (type === 'win') {
-      const savedGridName = localStorage.getItem('btsai_player_name');
-      const playerName = savedGridName || winner.replace(' Wins','').replace('Victory','Player');
-      const captureScore = (winnerCap || []).length;
-      submitScore(playerName, 'Realm Chess', captureScore);
-  }
 
   // Show screen
   document.getElementById('victory-screen').classList.add('show');
@@ -1995,59 +1775,6 @@ function reopenResults() {
 
 function setupLegend(){['K','Q','R','B','N','P'].forEach(t=>{const e=document.getElementById('l'+t);if(e)e.innerHTML=getSVG(t,false);});}
 setupLegend();
-
-// ── PLAYER NAME PROMPT ──
-(function() {
-    const modal   = document.getElementById('name-modal');
-    const input   = document.getElementById('nm-input');
-    const confirm = document.getElementById('nm-confirm');
-    const skip    = document.getElementById('nm-skip');
-
-    const existing = localStorage.getItem('btsai_player_name');
-    if (existing) return; // already set, don't show
-
-    // Show after short delay
-    setTimeout(() => { modal.classList.add('show'); input.focus(); }, 800);
-
-    function saveName() {
-        const val = input.value.trim();
-        if (val) localStorage.setItem('btsai_player_name', val);
-        else     localStorage.setItem('btsai_player_name', 'Guest');
-        modal.classList.remove('show');
-    }
-
-    confirm.addEventListener('click', saveName);
-    skip.addEventListener('click', () => {
-        localStorage.setItem('btsai_player_name', 'Guest');
-        modal.classList.remove('show');
-    });
-    input.addEventListener('keydown', e => { if (e.key === 'Enter') saveName(); });
-})();
-
-
-// ── LIVE SESSION TRACKER ──
-const _SURL = 'https://kepbwovgwvsfycmvsztu.supabase.co';
-const _SKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcGJ3b3Znd3ZzZnljbXZzenR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0OTkxNDMsImV4cCI6MjA5MDA3NTE0M30.cAS58qI-4N1Ddgrd4tqIxwjOj_u5l2QL5yNmXQVRr7c';
-const _SH   = { 'apikey': _SKEY, 'Authorization': 'Bearer ' + _SKEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' };
-
-async function setActiveGame(name) {
-    try {
-        // Upsert active_game key
-        await fetch(`${_SURL}/rest/v1/meta?key=eq.active_game`, {
-            method: 'PATCH', headers: _SH,
-            body: JSON.stringify({ value: name })
-        });
-    } catch(e) {}
-}
-
-// Set game as active on load
-const _GAME_NAME = document.title.includes('Chess') ? 'Realm Chess' : 'Cosmic Blackjack';
-setActiveGame(_GAME_NAME);
-
-// Clear when tab closes or navigates away
-window.addEventListener('beforeunload', () => { setActiveGame('none'); });
-window.addEventListener('pagehide',     () => { setActiveGame('none'); });
-
 </script>
 </body>
 </html>
