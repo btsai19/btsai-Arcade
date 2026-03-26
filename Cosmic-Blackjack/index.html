@@ -1327,9 +1327,54 @@ body {
   .chip-modal-player { font-size: 15px; }
   .chip-modal-preset { padding: 5px 10px; font-size: 12px; }
 }
-</style>
+
+    /* ── BACK TO GRID BUTTON ── */
+    #back-to-grid {
+        position: fixed;
+        top: 20px; left: 20px;
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: 'Outfit', 'Segoe UI', sans-serif;
+        font-size: 0.6rem;
+        font-weight: 400;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: rgba(232,230,225,0.55);
+        background: rgba(22,22,22,0.75);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 20px;
+        padding: 8px 16px 8px 12px;
+        cursor: pointer;
+        text-decoration: none;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        transition: color 0.2s, border-color 0.2s, background 0.2s;
+    }
+    #back-to-grid:hover {
+        color: rgba(232,230,225,0.95);
+        border-color: rgba(255,255,255,0.18);
+        background: rgba(32,32,32,0.9);
+    }
+    #back-to-grid svg {
+        width: 12px; height: 12px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        flex-shrink: 0;
+    }
+
+    </style>
 </head>
 <body>
+    <a id="back-to-grid" href="../index.html">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        The Grid
+    </a>
+
 
 <!-- Starfield -->
 <div id="starfield">
