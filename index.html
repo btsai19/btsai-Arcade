@@ -710,8 +710,31 @@
             transition: all 0.2s; flex-shrink: 0; font-family: 'Outfit', sans-serif;
         }
         .cl-close:hover { background: var(--card-h); color: var(--text); }
-        .cl-entry { padding: 22px 30px; border-bottom: 1px solid var(--border); position: relative; overflow: hidden; }
+        .cl-entry { padding: 22px 30px; border-bottom: 1px solid var(--border); position: relative; overflow: hidden; transition: background 0.4s; }
         .cl-entry:last-child { border-bottom: none; }
+
+        /* "new" shimmer state — applied to 3 most recent entries */
+        .cl-entry.cl-new {
+            background: rgba(212,169,71,0.04);
+        }
+        .cl-entry.cl-new::after {
+            content: '';
+            position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+            background: linear-gradient(180deg, transparent, #d4a947, transparent);
+            animation: clNewPulse 2.4s ease-in-out infinite;
+        }
+        @keyframes clNewPulse {
+            0%,100% { opacity: 0.4; }
+            50%      { opacity: 1; box-shadow: 0 0 8px rgba(212,169,71,0.6); }
+        }
+        /* NEW badge next to version */
+        .cl-new-badge {
+            font-size: 0.44rem; letter-spacing: 0.18em; text-transform: uppercase;
+            color: #d4a947; background: rgba(212,169,71,0.12);
+            border: 1px solid rgba(212,169,71,0.3); border-radius: 3px;
+            padding: 2px 6px; font-family: 'Outfit', sans-serif; font-weight: 500;
+            animation: clNewPulse 2.4s ease-in-out infinite;
+        }
         .cl-entry-num {
             position: absolute; right: 16px; bottom: -10px;
             font-family: 'Bebas Neue', sans-serif; font-size: 5.5rem;
@@ -824,21 +847,21 @@
         <div class="mq-track">
             <span class="mq-item">The Grid</span><span class="mq-item">Realm Chess</span>
             <span class="mq-item">Cosmic Blackjack</span><span class="mq-item">DEEP</span>
-            <span class="mq-item">Browser Games</span><span class="mq-item">Built by BTSAI</span>
-            <span class="mq-item">Play Now</span><span class="mq-item">More Incoming</span>
+            <span class="mq-item">FORGE</span><span class="mq-item">Built by BTSAI</span>
+            <span class="mq-item">Play Now</span><span class="mq-item">Browser Games</span>
             <span class="mq-item">The Grid</span><span class="mq-item">Realm Chess</span>
             <span class="mq-item">Cosmic Blackjack</span><span class="mq-item">DEEP</span>
-            <span class="mq-item">Browser Games</span><span class="mq-item">Built by BTSAI</span>
-            <span class="mq-item">Play Now</span><span class="mq-item">More Incoming</span>
+            <span class="mq-item">FORGE</span><span class="mq-item">Built by BTSAI</span>
+            <span class="mq-item">Play Now</span><span class="mq-item">Browser Games</span>
         </div>
     </div>
 
     <div id="update-banner">
         <div class="update-banner-inner" id="update-banner-inner">
             <div class="ub-dot"></div>
-            <span class="ub-tag">New Game</span>
+            <span class="ub-tag">Mar 2026</span>
             <div class="ub-sep" style="width:1px;height:14px;background:rgba(212,169,71,0.2);flex-shrink:0;"></div>
-            <span class="ub-headline">DEEP — Abyss Minesweeper is now live. Classic + Pressure modes.</span>
+            <span class="ub-headline">3 updates — FORGE &amp; DEEP launched, VOID21 major update</span>
             <button class="ub-cta" id="ub-cta-btn">
                 View changelog
                 <svg viewBox="0 0 24 24" style="width:10px;height:10px;stroke:#d4a947;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
@@ -901,18 +924,23 @@
                 <div class="cta-arr"><svg viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div>
             </div>
         </a>
-        <div class="card locked">
+        <a href="FORGE/" class="card">
+            <canvas class="card-border-glow" id="borderCanvas4"></canvas>
+            <div class="card-pulse"></div>
+            <div class="card-spotlight"></div>
+            <div class="card-shimmer"></div>
+            <canvas class="card-particles"></canvas>
             <div class="card-num">04</div>
-            <div class="card-status"><div class="dot off"></div>In Development</div>
-            <div class="card-icon"><svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 3 L15 10 M15 10 C10 10 6 14 6 19 C6 24 10 28 15 28 C20 28 24 24 24 19 C24 14 20 10 15 10Z" stroke="#444" stroke-width="1.5" stroke-linecap="round"/><path d="M11 17 Q13 14 15 17 Q17 20 19 17" stroke="#444" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg></div>
-            <h2 class="card-name">Classified</h2>
+            <div class="card-status"><div class="dot"></div>Live</div>
+            <div class="card-icon">⚗</div>
+            <h2 class="card-name">FORGE</h2>
             <p class="card-genre">Puzzle · Merge</p>
-            <p class="card-preview">Combine elements to unlock higher tiers. A satisfying merge game where the grid fills up faster than you think.</p>
+            <p class="card-preview">Transmute elements through eight alchemical tiers. Merge matching tiles, unlock new forms, and reach The Forge before the grid seals.</p>
             <div class="card-cta">
-                <span class="cta-text">Under Construction</span>
+                <span class="cta-text">Play Now</span>
                 <div class="cta-arr"><svg viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div>
             </div>
-        </div>
+        </a>
         <div class="card locked">
             <div class="card-num">05</div>
             <div class="card-status"><div class="dot off"></div>In Development</div>
@@ -946,6 +974,7 @@
             <button class="lb-tab" data-g="Realm Chess">Realm Chess</button>
             <button class="lb-tab" data-g="Cosmic Blackjack">Cosmic Blackjack</button>
             <button class="lb-tab" data-g="DEEP">DEEP</button>
+            <button class="lb-tab" data-g="FORGE">FORGE</button>
         </div>
         <div class="lb-box" id="lbBox">
             <div class="lb-load">Loading scores...</div>
@@ -1064,11 +1093,41 @@
                 <button class="cl-close" id="cl-close">✕</button>
             </div>
 
-            <div class="cl-entry">
+            <div class="cl-entry cl-new">
+                <div class="cl-entry-num">04</div>
+                <div class="cl-entry-top">
+                    <span class="cl-version">v1.0</span>
+                    <span class="cl-game-tag">FORGE</span>
+                    <span class="cl-new-badge">NEW</span>
+                    <span class="cl-date">Mar 2026</span>
+                </div>
+                <div class="cl-entry-title">FORGE Goes Live</div>
+                <div class="cl-entry-summary">An alchemy-themed merge puzzle. Transmute elements through eight tiers — from Ash to The Forge — before the grid seals shut.</div>
+                <button class="cl-expand-btn" id="expand-forge">Full changelog <span class="cl-chev">▾</span></button>
+                <div class="cl-bullets" id="bullets-forge">
+                    <ul>
+                        <li class="cl-cat">Setup</li>
+                        <li><b>Grid size</b><span>Choose 4×4, 5×5, or 6×6 before each run</span></li>
+                        <li><b>Win condition</b><span>Grid Full, Reach The Forge (top tier), or Both — whichever triggers first</span></li>
+                        <li class="cl-cat">Gameplay</li>
+                        <li><b>Click-to-merge</b><span>Select a tile, then click an adjacent matching tile to combine them</span></li>
+                        <li><b>8 alchemy tiers</b><span>Ash → Ember → Spark → Flame → Blaze → Inferno → Plasma → The Forge</span></li>
+                        <li><b>Tile spawning</b><span>1–2 new low-tier tiles spawn after each merge, pressure builds gradually</span></li>
+                        <li><b>Best score</b><span>Tracked locally per grid size</span></li>
+                        <li class="cl-cat">UI &amp; Polish</li>
+                        <li><b>Alchemy theme</b><span>Warm charcoal + amber/fire palette — completely distinct from other games</span></li>
+                        <li><b>Tier progress bar</b><span>8-pip bar tracks highest tier unlocked in the current run</span></li>
+                        <li><b>Leaderboard</b><span>Score submitted to THE GRID global scores via Supabase</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="cl-entry cl-new">
                 <div class="cl-entry-num">03</div>
                 <div class="cl-entry-top">
                     <span class="cl-version">v1.0</span>
                     <span class="cl-game-tag">DEEP</span>
+                    <span class="cl-new-badge">NEW</span>
                     <span class="cl-date">Mar 2026</span>
                 </div>
                 <div class="cl-entry-title">DEEP Goes Live</div>
@@ -1093,11 +1152,12 @@
                 </div>
             </div>
 
-            <div class="cl-entry">
+            <div class="cl-entry cl-new">
                 <div class="cl-entry-num">02</div>
                 <div class="cl-entry-top">
                     <span class="cl-version">v2.0</span>
                     <span class="cl-game-tag">Cosmic Blackjack</span>
+                    <span class="cl-new-badge">NEW</span>
                     <span class="cl-date">Mar 2026</span>
                 </div>
                 <div class="cl-entry-title">VOID21 Major Update</div>
@@ -1171,15 +1231,23 @@ document.getElementById('ub-dismiss').addEventListener('click', e => {
     e.stopPropagation();
     document.getElementById('update-banner').classList.add('dismissed');
 });
+document.getElementById('expand-forge').addEventListener('click', function() {
+    const b = document.getElementById('bullets-forge');
+    const open = b.classList.toggle('open');
+    this.classList.toggle('open', open);
+    if (open) { this.closest('.cl-entry')?.classList.remove('cl-new'); this.closest('.cl-entry')?.querySelector('.cl-new-badge')?.remove(); }
+});
 document.getElementById('expand-0').addEventListener('click', function() {
     const b = document.getElementById('bullets-0');
     const open = b.classList.toggle('open');
     this.classList.toggle('open', open);
+    if (open) { this.closest('.cl-entry')?.classList.remove('cl-new'); this.closest('.cl-entry')?.querySelector('.cl-new-badge')?.remove(); }
 });
 document.getElementById('expand-1').addEventListener('click', function() {
     const b = document.getElementById('bullets-1');
     const open = b.classList.toggle('open');
     this.classList.toggle('open', open);
+    if (open) { this.closest('.cl-entry')?.classList.remove('cl-new'); this.closest('.cl-entry')?.querySelector('.cl-new-badge')?.remove(); }
 });
 document.getElementById('expand-2').addEventListener('click', function() {
     const b = document.getElementById('bullets-2');
@@ -1529,7 +1597,7 @@ async function incrementSessions() {
 }
 
 setTimeout(async () => {
-    animCount(document.getElementById('cGames'), 3, 1200, 2);
+    animCount(document.getElementById('cGames'), 4, 1200, 2);
     const alreadyCounted = localStorage.getItem('thegrid_visited');
     let globalSessions;
     if (!alreadyCounted) {
