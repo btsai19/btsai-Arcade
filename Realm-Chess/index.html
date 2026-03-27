@@ -102,6 +102,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .ctrl-btn.active-sound{border-color:var(--accent);color:var(--accent)}
 .back-btn{background:transparent;border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-family:'Cinzel',serif;font-size:.5rem;color:var(--muted);cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all .2s}
 .back-btn:hover{border-color:var(--muted);color:var(--text)}
+.chess-portal-btn{font-size:16px;color:var(--muted);text-decoration:none;opacity:0.65;transition:opacity 0.2s,background 0.2s;padding:2px 5px;border-radius:6px;line-height:1;}
+.chess-portal-btn:hover{opacity:1;background:rgba(167,139,250,0.1);}
 
 /* ── timer blocks ── */
 .timer-block{
@@ -509,6 +511,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
     <div class="header-right">
       <button class="ctrl-btn active-sound" id="sound-btn" onclick="toggleSound()">♪ Sound</button>
       <div class="mode-tag" id="mode-tag">vs AI</div>
+      <a href="../index.html" class="chess-portal-btn" title="Back to The Grid">⌂</a>
     </div>
   </div>
 
