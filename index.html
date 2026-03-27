@@ -1,7 +1,7 @@
 <!DOCTYPE html> 
 <html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">  
+    <meta charset="UTF-8"> 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>THE GRID — BTSAI</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -733,14 +733,26 @@
         .cl-expand-btn:hover { border-color: var(--border-h); color: var(--text); background: var(--card-h); }
         .cl-chev { display: inline-block; transition: transform 0.25s; font-size: 9px; }
         .cl-expand-btn.open .cl-chev { transform: rotate(180deg); }
-        .cl-bullets { overflow: hidden; max-height: 0; transition: max-height 0.4s cubic-bezier(0.22,1,0.36,1); }
-        .cl-bullets.open { max-height: 700px; }
-        .cl-bullets ul { margin-top: 14px; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 7px; }
-        .cl-bullets li { display: flex; align-items: flex-start; gap: 10px; font-size: 0.75rem; line-height: 1.6; color: var(--mid); }
-        .cl-bullets li::before { content: '—'; color: var(--dim); flex-shrink: 0; margin-top: 1px; }
+        .cl-bullets { overflow: hidden; max-height: 0; transition: max-height 0.5s cubic-bezier(0.22,1,0.36,1); }
+        .cl-bullets.open { max-height: 900px; }
+        .cl-bullets ul { margin-top: 16px; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 0; }
+        .cl-bullets li {
+            display: grid; grid-template-columns: 180px 1fr;
+            gap: 8px 16px; padding: 7px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.74rem; line-height: 1.55; color: var(--mid);
+            align-items: baseline;
+        }
+        .cl-bullets li:last-child { border-bottom: none; }
+        .cl-bullets li::before { display: none; }
         .cl-bullets li b { color: var(--text); font-weight: 500; }
-        .cl-cat { font-size: 0.52rem !important; letter-spacing: 0.22em; text-transform: uppercase; color: #d4a947 !important; opacity: 0.7; margin-top: 14px; margin-bottom: 2px; }
-        .cl-cat::before { display: none !important; }
+        .cl-cat {
+            grid-column: 1 / -1;
+            font-size: 0.5rem !important; letter-spacing: 0.24em;
+            text-transform: uppercase; color: #d4a947 !important;
+            padding: 14px 0 4px; border-bottom: none !important;
+            font-weight: 600;
+        }
 
         @media (max-width: 700px) {
             #update-banner { padding-left: 24px; padding-right: 24px; }
@@ -1065,18 +1077,18 @@
                 <div class="cl-bullets" id="bullets-0">
                     <ul>
                         <li class="cl-cat">Launch &amp; Setup</li>
-                        <li><b>Two modes</b> — Classic (race your best time) and Pressure (rising tide auto-reveals cells from below)</li>
-                        <li><b>Preset + custom difficulty</b> — Easy / Medium / Hard presets with live row, column, and mine sliders</li>
-                        <li><b>Best time tracking</b> — saved locally per exact config (mode + grid size + mine count)</li>
+                        <li><b>Two modes</b><span>Classic (race your best time) and Pressure (rising tide auto-reveals cells from below)</span></li>
+                        <li><b>Preset + custom difficulty</b><span>Easy / Medium / Hard presets with live row, column, and mine sliders</span></li>
+                        <li><b>Best time tracking</b><span>Saved locally per exact config — mode, grid size, and mine count</span></li>
                         <li class="cl-cat">Gameplay</li>
-                        <li><b>Flood reveal</b> — clicking an empty cell cascades to all connected safe cells instantly</li>
-                        <li><b>First-click safety</b> — mines never spawn on or adjacent to your first cell</li>
-                        <li><b>Pause / Resume</b> — freezes timer and tide pressure mid-game with a frosted overlay</li>
-                        <li><b>Right-click / long-press</b> to drop amber beacon flags on suspected charges</li>
+                        <li><b>Flood reveal</b><span>Clicking an empty cell cascades to all connected safe cells instantly</span></li>
+                        <li><b>First-click safety</b><span>Mines never spawn on or adjacent to your first cell</span></li>
+                        <li><b>Pause / Resume</b><span>Freezes timer and tide pressure mid-game with a frosted grid overlay</span></li>
+                        <li><b>Right-click / long-press</b><span>Drop amber beacon flags on suspected depth charges</span></li>
                         <li class="cl-cat">UI &amp; Polish</li>
-                        <li>Deep navy + bioluminescent cyan sonar aesthetic — scanline background, pressure gauge timer</li>
-                        <li>Staggered depth charge reveal animation on loss, bioluminescent flood animation on reveal</li>
-                        <li>Score submitted to global leaderboard (win time in seconds) via Supabase</li>
+                        <li><b>Ocean floor aesthetic</b><span>Deep navy + bioluminescent cyan, scanline background, pressure gauge timer</span></li>
+                        <li><b>Staggered reveal</b><span>Depth charges reveal with a cascade animation on loss</span></li>
+                        <li><b>Leaderboard</b><span>Win time submitted to THE GRID global scores via Supabase</span></li>
                     </ul>
                 </div>
             </div>
@@ -1094,22 +1106,22 @@
                 <div class="cl-bullets" id="bullets-1">
                     <ul>
                         <li class="cl-cat">Launch &amp; Setup</li>
-                        <li><b>New launch flow</b> — Solo vs Multiplayer split screen replaces old player count picker</li>
-                        <li><b>Multiplayer expanded</b> to 10 players (up from 8), named players + avatar icons per player</li>
-                        <li><b>Bet limits</b> — set a min and max bet at setup, enforced throughout the session</li>
+                        <li><b>New launch flow</b><span>Solo vs Multiplayer split screen replaces old player count picker</span></li>
+                        <li><b>Multiplayer expanded</b><span>Up to 10 players, named players + avatar icons per seat</span></li>
+                        <li><b>Bet limits</b><span>Set a min and max bet at setup, enforced throughout the session</span></li>
                         <li class="cl-cat">Game Modes</li>
-                        <li><b>Free Play</b> — infinite mode, END button only exit</li>
-                        <li><b>Goal Mode</b> — race to a chip target; game ends the round someone hits it</li>
-                        <li><b>Survival Mode</b> — hit 0 chips and you're eliminated; last player standing wins</li>
-                        <li><b>Challenge Mode</b> — hit a chip target within a set round limit or the run ends</li>
+                        <li><b>Free Play</b><span>Infinite mode, END button only exit</span></li>
+                        <li><b>Goal Mode</b><span>Race to a chip target; game ends the round someone hits it</span></li>
+                        <li><b>Survival Mode</b><span>Hit 0 chips and you're eliminated; last player standing wins</span></li>
+                        <li><b>Challenge Mode</b><span>Hit a chip target within a set round limit or the run ends</span></li>
                         <li class="cl-cat">New Mechanics</li>
-                        <li><b>Insurance</b> — offered when dealer shows an Ace; pays 2:1 on dealer blackjack</li>
-                        <li><b>Void Events</b> — 8 random cosmic effects per round, toggleable with adjustable trigger chance</li>
-                        <li><b>Streak tracking</b> — 🔥 HOT and 🧊 COLD streaks shown per player</li>
+                        <li><b>Insurance</b><span>Offered when dealer shows an Ace; pays 2:1 on dealer blackjack</span></li>
+                        <li><b>Void Events</b><span>8 random cosmic effects per round, toggleable with adjustable trigger chance</span></li>
+                        <li><b>Streak tracking</b><span>🔥 HOT and 🧊 COLD streaks shown per player</span></li>
                         <li class="cl-cat">UI &amp; Polish</li>
-                        <li>Inline mode descriptions and void event drawer on setup screen</li>
-                        <li>Challenge and Goal progress bars visible during play</li>
-                        <li>End game screen adapts title and summary by game mode</li>
+                        <li><b>Mode descriptions</b><span>Inline mode descriptions and void event drawer on setup screen</span></li>
+                        <li><b>Progress bars</b><span>Challenge and Goal progress visible during play</span></li>
+                        <li><b>Smart end screen</b><span>Title and summary adapt based on active game mode</span></li>
                     </ul>
                 </div>
             </div>
@@ -1126,12 +1138,12 @@
                 <button class="cl-expand-btn" id="expand-2">Full changelog <span class="cl-chev">▾</span></button>
                 <div class="cl-bullets" id="bullets-2">
                     <ul>
-                        <li><b>Realm Chess</b> — fantasy chess vs AI or 2P pass-and-play, 3 AI difficulties, full chess rules</li>
-                        <li><b>Cosmic Blackjack (VOID21)</b> — 1–8 players, cosmic card suits, hit/stand/double/split</li>
-                        <li><b>Global leaderboard</b> via Supabase pulling scores from both games</li>
-                        <li><b>Global session counter</b> tracking total visits</li>
-                        <li><b>Now Playing pill</b> — live indicator when a game is being played</li>
-                        <li>Portal: comet cursor, 3D card tilt, shimmer, dark/light theme, splash screen</li>
+                        <li><b>Realm Chess</b><span>Fantasy chess vs AI or 2P pass-and-play, 3 AI difficulties, full chess rules</span></li>
+                        <li><b>Cosmic Blackjack</b><span>1–8 players, cosmic card suits, hit / stand / double / split</span></li>
+                        <li><b>Global leaderboard</b><span>Supabase-backed scores pulling from all games</span></li>
+                        <li><b>Session counter</b><span>Global visit tracking via Supabase</span></li>
+                        <li><b>Now Playing pill</b><span>Live indicator when a game is actively being played</span></li>
+                        <li><b>Portal polish</b><span>Comet cursor, 3D card tilt, shimmer hover, dark/light theme, splash screen</span></li>
                     </ul>
                 </div>
             </div>
@@ -1518,7 +1530,19 @@ async function incrementSessions() {
 
 setTimeout(async () => {
     animCount(document.getElementById('cGames'), 3, 1200, 2);
-    const globalSessions = await incrementSessions();
+    const alreadyCounted = localStorage.getItem('thegrid_visited');
+    let globalSessions;
+    if (!alreadyCounted) {
+        localStorage.setItem('thegrid_visited', '1');
+        globalSessions = await incrementSessions();
+    } else {
+        // just fetch current count without incrementing
+        try {
+            const res = await fetch(`${SUPA_URL}/rest/v1/meta?key=eq.sessions&select=value`, { headers: SUPA_HEADERS });
+            const data = await res.json();
+            globalSessions = data[0]?.value || 0;
+        } catch(e) { globalSessions = 0; }
+    }
     const display = globalSessions !== null ? Math.min(globalSessions, 9999) : 0;
     animCount(document.getElementById('cVisits'), display, 1600, display > 999 ? 4 : 3);
 }, 2500);
