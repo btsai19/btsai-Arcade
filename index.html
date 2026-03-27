@@ -389,6 +389,7 @@
         .card.locked { cursor: default; }
         .card.locked:hover { transform:none; box-shadow:none; background:var(--card); border-color:var(--border); }
         .card.locked .card-name, .card.locked .card-icon { color: var(--dim); }
+        /* overridden below with more specific rules for better visibility */
         .card.locked .card-genre, .card.locked .cta-text, .card.locked .card-preview { color: var(--dim); }
         .card.locked .card-cta { border-top-color: var(--border); }
         .card.locked .cta-arr { border-color: var(--border); }
@@ -524,9 +525,9 @@
         @media (max-width: 700px) { .nav-links { display: none; } }
 
         /* ── LOCKED CARD — more readable ── */
-        .card.locked .card-name, .card.locked .card-icon { color: #555; }
-        [data-theme="light"] .card.locked .card-name,
-        [data-theme="light"] .card.locked .card-icon { color: #aaa; }
+        .card.locked .card-icon { opacity: 0.4; }
+        .card.locked .card-name { color: #555; }
+        [data-theme="light"] .card.locked .card-name { color: #aaa; }
         .card.locked .card-genre { color: #484848; }
         [data-theme="light"] .card.locked .card-genre { color: #bbb; }
         .card.locked .card-preview { color: #444; }
@@ -860,7 +861,7 @@
         <div class="card locked">
             <div class="card-num">03</div>
             <div class="card-status"><div class="dot off"></div>In Development</div>
-            <div class="card-icon">⬡</div>
+            <div class="card-icon"><svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="12" height="12" rx="1.5" stroke="#444" stroke-width="1.5"/><rect x="17" y="1" width="12" height="12" rx="1.5" stroke="#444" stroke-width="1.5"/><rect x="1" y="17" width="12" height="12" rx="1.5" stroke="#444" stroke-width="1.5"/><rect x="17" y="17" width="12" height="12" rx="1.5" stroke="#444" stroke-width="1.5"/></svg></div>
             <h2 class="card-name">Classified</h2>
             <p class="card-genre">Board · Strategy</p>
             <p class="card-preview">Something tile-based is taking shape. Territory, tactics, and calculated moves — details drop when it's ready.</p>
@@ -872,7 +873,7 @@
         <div class="card locked">
             <div class="card-num">04</div>
             <div class="card-status"><div class="dot off"></div>In Development</div>
-            <div class="card-icon">◈</div>
+            <div class="card-icon"><svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="15" cy="15" r="10" stroke="#444" stroke-width="1.5"/><circle cx="15" cy="15" r="4" stroke="#444" stroke-width="1.5"/><line x1="15" y1="1" x2="15" y2="8" stroke="#444" stroke-width="1.5" stroke-linecap="round"/><line x1="15" y1="22" x2="15" y2="29" stroke="#444" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="15" x2="8" y2="15" stroke="#444" stroke-width="1.5" stroke-linecap="round"/><line x1="22" y1="15" x2="29" y2="15" stroke="#444" stroke-width="1.5" stroke-linecap="round"/></svg></div>
             <h2 class="card-name">Classified</h2>
             <p class="card-genre">Puzzle · Logic</p>
             <p class="card-preview">A logic puzzle that rewards patience over speed. Minimal interface, deep mechanics. It'll make sense when it drops.</p>
@@ -884,7 +885,7 @@
         <div class="card locked">
             <div class="card-num">05</div>
             <div class="card-status"><div class="dot off"></div>In Development</div>
-            <div class="card-icon">🎲</div>
+            <div class="card-icon"><svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="28" height="28" rx="5" stroke="#444" stroke-width="1.5"/><circle cx="9" cy="9" r="2" fill="#444"/><circle cx="21" cy="9" r="2" fill="#444"/><circle cx="15" cy="15" r="2" fill="#444"/><circle cx="9" cy="21" r="2" fill="#444"/><circle cx="21" cy="21" r="2" fill="#444"/></svg></div>
             <h2 class="card-name">Classified</h2>
             <p class="card-genre">Dice · Press Your Luck</p>
             <p class="card-preview">A push-your-luck dice game built around risk and restraint. Roll, hold, or fold — the numbers decide everything.</p>
@@ -896,7 +897,7 @@
         <div class="card locked">
             <div class="card-num">06</div>
             <div class="card-status"><div class="dot off"></div>In Development</div>
-            <div class="card-icon">🕹</div>
+            <div class="card-icon"><svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline points="18,2 10,16 16,16 12,28 22,12 15,12" stroke="#444" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
             <h2 class="card-name">Classified</h2>
             <p class="card-genre">Arcade · Reflex</p>
             <p class="card-preview">Fast, pattern-driven, unforgiving. An arcade reflex game that strips everything back to pure reaction speed.</p>
