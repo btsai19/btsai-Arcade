@@ -93,6 +93,83 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;bac
 .portal-link{margin-top:14px;font-size:11px;color:var(--text-muted);text-decoration:none;letter-spacing:0.04em;transition:color 0.2s;}
 .portal-link:hover{color:var(--fire);}
 
+
+/* ── MODE PICK — arrow style, no check ── */
+.mode-pick { cursor:pointer; }
+.opt-card-arrow { font-size:18px; color:var(--text-muted); transition:all 0.2s; flex-shrink:0; }
+.opt-card:hover .opt-card-arrow { color:var(--fire); transform:translateX(4px); }
+
+/* ── HELP INLINE BTN ── */
+.help-inline-btn {
+  background:none;border:1px solid var(--border);border-radius:20px;
+  color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:11px;
+  font-weight:500;padding:5px 14px;cursor:pointer;transition:all 0.2s;margin-top:10px;
+}
+.help-inline-btn:hover{border-color:var(--border-h);color:var(--text-dim);}
+
+/* ── SETTINGS SCREEN ── */
+.settings-mode-badge {
+  font-family:'DM Serif Display',serif;font-size:22px;
+  color:var(--text);margin-bottom:2px;text-align:center;
+}
+.settings-sub {
+  font-size:11px;color:var(--text-dim);letter-spacing:0.04em;
+  margin-bottom:20px;text-align:center;
+}
+.settings-section { width:100%;margin-bottom:18px; }
+.settings-label {
+  font-size:9px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:8px;
+}
+.settings-row { display:flex;gap:7px;width:100%; }
+.settings-row.three-col .opt-sm { flex:1; }
+.settings-row.four-col  .opt-sm { flex:1; }
+
+/* ── SMALL OPTION BUTTONS ── */
+.opt-sm {
+  flex:1;padding:9px 4px;
+  background:var(--surface);border:1.5px solid var(--border);
+  border-radius:10px;cursor:pointer;transition:all 0.2s;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  font-size:13px;font-weight:600;color:var(--text-dim);text-align:center;
+}
+.opt-sm span { font-size:9px;font-weight:400;letter-spacing:0.06em;color:var(--text-muted); }
+.opt-sm:hover { border-color:var(--border-h);background:var(--surface2); }
+.opt-sm.active { border-color:var(--fire);background:rgba(217,78,10,0.05);color:var(--fire); }
+.opt-sm.active span { color:var(--amber); }
+
+/* ── COMPACT OPT CARD ── */
+.opt-card.compact { padding:10px 14px; }
+.opt-card.compact .opt-card-title { font-size:12px; }
+.opt-card.compact .opt-card-desc  { font-size:10px; }
+.opt-card.compact .opt-card-icon  { width:28px;text-align:center; }
+
+/* ── THEME PREVIEW ── */
+.theme-preview {
+  display:flex;gap:4px;margin-top:8px;flex-wrap:wrap;
+}
+.tp-chip {
+  font-size:11px;padding:3px 8px;border-radius:20px;border:1px solid var(--border);
+  color:var(--text-dim);display:flex;align-items:center;gap:4px;
+  font-family:'DM Sans',sans-serif;font-weight:400;
+}
+
+/* ── TIMER HUD ── */
+#hud-timer-block { display:none; }
+.hud-val.timer-warn { color:var(--amber) !important; animation:timerWarn 1s ease-in-out infinite; }
+.hud-val.timer-danger { color:var(--fire) !important; animation:timerDanger 0.5s ease-in-out infinite; }
+@keyframes timerWarn  { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
+@keyframes timerDanger{ 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.7;transform:scale(1.08);} }
+
+/* ── TIMER FLASH OVERLAY ── */
+#timer-flash {
+  position:fixed;inset:0;pointer-events:none;z-index:150;
+  opacity:0;transition:opacity 0.15s;
+}
+#timer-flash.warn   { background:rgba(244,160,48,0.06); }
+#timer-flash.danger { background:rgba(217,78,10,0.1);   }
+#timer-flash.show   { opacity:1; }
+
 /* GAME SCREEN */
 #game-screen{display:flex;padding-top:calc(var(--header-h)+10px);padding-bottom:12px;flex-direction:column;align-items:center;justify-content:flex-start;gap:10px;overflow-y:auto;}
 
@@ -197,8 +274,8 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;bac
 .result-btn.secondary:hover{border-color:var(--border-h);color:var(--text);}
 
 /* DESKTOP HINT */
-#desktop-hint{display:none;position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:300;font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-dim);background:rgba(241,240,238,0.94);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:20px;padding:6px 16px;white-space:nowrap;opacity:0;transition:opacity 0.5s;}
-@media(hover:none)and(pointer:coarse){#desktop-hint{display:block;}}
+#desktop-hint{display:block;position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:300;font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-dim);background:rgba(241,240,238,0.94);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:20px;padding:6px 16px;white-space:nowrap;opacity:0;transition:opacity 0.5s;pointer-events:none;}
+#desktop-hint.hint-visible{opacity:1;pointer-events:auto;}
 #desktop-hint.hidden-hint{opacity:0 !important;pointer-events:none;}
 ::-webkit-scrollbar{width:4px;height:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
@@ -219,95 +296,125 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;bac
   </div>
 </header>
 
-<!-- STEP 1: GRID SIZE -->
-<div class="screen" id="screen-grid">
-  <div class="screen-inner">
+<!-- SCREEN 1: MODE SELECT — click goes straight to settings, no Continue -->
+<div class="screen" id="screen-mode">
+  <div class="screen-inner" style="max-width:480px;">
     <div class="forge-logo">For<em>g</em>e</div>
     <div class="forge-tagline">Alchemy Merge · Transmute the Elements</div>
-    <div class="step-indicator">
-      <div class="step-dot active"></div>
-      <div class="step-dot"></div>
-    </div>
-    <div class="step-heading">Choose your grid</div>
-    <div class="step-sub">Larger grids give more room — and more chaos.</div>
-    <div class="opt-grid">
-      <div class="opt-card selected" id="g4" onclick="setGrid(4)">
-        <div class="opt-card-icon">▪</div>
+    <div class="opt-grid" style="gap:10px;">
+      <div class="opt-card mode-pick" id="mode-classic" onclick="pickMode('classic')">
+        <div class="opt-card-icon">⚗</div>
         <div class="opt-card-body">
-          <div class="opt-card-title">4 × 4 · Focused</div>
-          <div class="opt-card-desc">16 tiles. Quick games, tight decisions, high pressure.</div>
+          <div class="opt-card-title">Classic</div>
+          <div class="opt-card-desc">Merge tiles, reach The Forge, survive as long as you can. No time pressure.</div>
         </div>
-        <div class="opt-card-check">✓</div>
+        <div class="opt-card-arrow">→</div>
       </div>
-      <div class="opt-card" id="g5" onclick="setGrid(5)">
-        <div class="opt-card-icon">▪</div>
+      <div class="opt-card mode-pick" id="mode-countdown" onclick="pickMode('countdown')">
+        <div class="opt-card-icon">⏳</div>
         <div class="opt-card-body">
-          <div class="opt-card-title">5 × 5 · Balanced</div>
-          <div class="opt-card-desc">25 tiles. The sweet spot — room to breathe, room to fail.</div>
+          <div class="opt-card-title">Countdown</div>
+          <div class="opt-card-desc">Race against the clock. Merge as much as possible before time runs out.</div>
         </div>
-        <div class="opt-card-check"></div>
+        <div class="opt-card-arrow">→</div>
       </div>
-      <div class="opt-card" id="g6" onclick="setGrid(6)">
-        <div class="opt-card-icon">▪</div>
+      <div class="opt-card mode-pick" id="mode-stopwatch" onclick="pickMode('stopwatch')">
+        <div class="opt-card-icon">⏱</div>
         <div class="opt-card-body">
-          <div class="opt-card-title">6 × 6 · Expansive</div>
-          <div class="opt-card-desc">36 tiles. Longer runs, deeper strategy, slower burn.</div>
+          <div class="opt-card-title">Stopwatch</div>
+          <div class="opt-card-desc">How fast can you reach The Forge? Timer counts up — beat your record.</div>
         </div>
-        <div class="opt-card-check"></div>
+        <div class="opt-card-arrow">→</div>
       </div>
     </div>
-    <button class="next-btn" onclick="goStep2()">Continue →</button>
-    <button onclick="openHow()" title="How to play" style="margin-top:10px;background:none;border:1px solid var(--border);color:var(--text-dim);width:28px;height:28px;border-radius:50%;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--fire)';this.style.color='var(--fire)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">?</button>
+    <button onclick="openHow()" title="How to play" class="help-inline-btn">?</button>
     <a href="../index.html" class="portal-link">← The Grid</a>
   </div>
 </div>
 
-<!-- STEP 2: WIN CONDITION -->
-<div class="screen hidden" id="screen-win">
-  <div class="screen-inner">
-    <div class="step-back" onclick="goStep1()">← Back</div>
-    <div class="step-indicator">
-      <div class="step-dot done"></div>
-      <div class="step-dot active"></div>
-    </div>
-    <div class="step-heading">How do you win?</div>
-    <div class="step-sub">Pick the condition that ends the run.</div>
-    <div class="opt-grid">
-      <div class="opt-card selected" id="wc-both" onclick="setWin('both')">
-        <div class="opt-card-icon">⚡</div>
-        <div class="opt-card-body">
-          <div class="opt-card-title">Either · First Trigger</div>
-          <div class="opt-card-desc">Win if you reach The Forge. Lose if the grid seals. Recommended.</div>
-        </div>
-        <div class="opt-card-check">✓</div>
-      </div>
-      <div class="opt-card" id="wc-top" onclick="setWin('top')">
-        <div class="opt-card-icon">♾</div>
-        <div class="opt-card-body">
-          <div class="opt-card-title">Reach The Forge</div>
-          <div class="opt-card-desc">Only goal is reaching Tier 8. Grid fills but the game continues.</div>
-        </div>
-        <div class="opt-card-check"></div>
-      </div>
-      <div class="opt-card" id="wc-fill" onclick="setWin('fill')">
-        <div class="opt-card-icon">🏆</div>
-        <div class="opt-card-body">
-          <div class="opt-card-title">Survive Longest</div>
-          <div class="opt-card-desc">Game ends when no merges remain. Score as high as you can.</div>
-        </div>
-        <div class="opt-card-check"></div>
+<!-- SCREEN 2: SETTINGS (grid + tiles + win condition) -->
+<div class="screen hidden" id="screen-settings">
+  <div class="screen-inner" style="max-width:480px;padding-top:20px;overflow-y:auto;max-height:100dvh;justify-content:flex-start;">
+    <div class="step-back" onclick="goModeSelect()">← Back</div>
+    <div class="settings-mode-badge" id="settings-mode-badge">⚗ Classic</div>
+    <div class="settings-sub" id="settings-mode-sub">Merge to The Forge, no time limit</div>
+
+    <!-- Grid size -->
+    <div class="settings-section">
+      <div class="settings-label">Grid Size</div>
+      <div class="settings-row three-col">
+        <div class="opt-sm active" id="g4" onclick="setGrid(4)">4×4<span>Quick</span></div>
+        <div class="opt-sm" id="g5" onclick="setGrid(5)">5×5<span>Balanced</span></div>
+        <div class="opt-sm" id="g6" onclick="setGrid(6)">6×6<span>Long</span></div>
       </div>
     </div>
-    <button class="next-btn" onclick="startGame()">⚗ Begin Transmutation</button>
-  <button onclick="openHow()" title="How to play" style="margin-top:10px;background:none;border:1px solid var(--border);color:var(--text-dim);width:28px;height:28px;border-radius:50%;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--fire)';this.style.color='var(--fire)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">?</button>
+
+    <!-- Tile theme -->
+    <div class="settings-section">
+      <div class="settings-label">Tile Theme</div>
+      <div class="settings-row four-col">
+        <div class="opt-sm active" id="th-alchemy" onclick="setTheme('alchemy')">🪨<span>Alchemy</span></div>
+        <div class="opt-sm" id="th-nature"  onclick="setTheme('nature')">🌱<span>Nature</span></div>
+        <div class="opt-sm" id="th-cosmos"  onclick="setTheme('cosmos')">🌙<span>Cosmos</span></div>
+        <div class="opt-sm" id="th-dragon"  onclick="setTheme('dragon')">🥚<span>Dragon</span></div>
+      </div>
+      <!-- Preview row -->
+      <div class="theme-preview" id="theme-preview"></div>
+    </div>
+
+    <!-- Countdown duration (only shown in countdown mode) -->
+    <div class="settings-section" id="section-countdown" style="display:none;">
+      <div class="settings-label">Time Limit</div>
+      <div class="settings-row three-col">
+        <div class="opt-sm" id="t60"  onclick="setCountdown(60)">1 min</div>
+        <div class="opt-sm active" id="t120" onclick="setCountdown(120)">2 min</div>
+        <div class="opt-sm" id="t300" onclick="setCountdown(300)">5 min</div>
+      </div>
+    </div>
+
+    <!-- Win condition (classic + stopwatch only) -->
+    <div class="settings-section" id="section-wincond">
+      <div class="settings-label">Win Condition</div>
+      <div class="opt-grid" style="gap:7px;">
+        <div class="opt-card compact selected" id="wc-both" onclick="setWin('both')">
+          <div class="opt-card-icon" style="font-size:18px;">⚡</div>
+          <div class="opt-card-body">
+            <div class="opt-card-title">Either · First Trigger</div>
+            <div class="opt-card-desc">Win reaching The Forge, lose if grid seals.</div>
+          </div>
+          <div class="opt-card-check">✓</div>
+        </div>
+        <div class="opt-card compact" id="wc-top" onclick="setWin('top')">
+          <div class="opt-card-icon" style="font-size:18px;">♾</div>
+          <div class="opt-card-body">
+            <div class="opt-card-title">Reach The Forge</div>
+            <div class="opt-card-desc">Only goal is Tier 8. Grid keeps filling.</div>
+          </div>
+          <div class="opt-card-check"></div>
+        </div>
+        <div class="opt-card compact" id="wc-fill" onclick="setWin('fill')">
+          <div class="opt-card-icon" style="font-size:18px;">🏆</div>
+          <div class="opt-card-body">
+            <div class="opt-card-title">Survive Longest</div>
+            <div class="opt-card-desc">Score as high as you can before grid seals.</div>
+          </div>
+          <div class="opt-card-check"></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="next-btn" onclick="startGame()" style="margin-top:4px;">⚗ Begin Transmutation</button>
+    <div style="height:16px;"></div>
   </div>
 </div>
+
 
 <!-- GAME SCREEN -->
 <div class="screen hidden" id="game-screen">
   <div id="hud">
     <div class="hud-block"><span class="hud-label">Score</span><span class="hud-val fire" id="hud-score">0</span></div>
     <div class="hud-block"><span class="hud-label">Merges</span><span class="hud-val sm" id="hud-merges">0</span></div>
+    <div class="hud-block" id="hud-timer-block" style="display:none;"><span class="hud-label" id="hud-timer-label">Time</span><span class="hud-val sm" id="hud-timer-val">2:00</span></div>
     <div class="hud-block"><span class="hud-label">Best</span><span class="hud-val sm" id="hud-best">—</span></div>
     <div class="hud-block"><span class="hud-label">Top Tier</span><span class="hud-val sm" id="hud-tier">—</span></div>
   </div>
@@ -318,6 +425,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;bac
     <div class="tier-pip" id="pip7"></div><div class="tier-pip" id="pip8"></div>
     <div id="tier-label">Ash</div>
   </div>
+  <div id="timer-flash" class="timer-flash"></div>
   <div id="grid-wrap"><div id="grid"></div></div>
 </div>
 
@@ -416,19 +524,24 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;bac
 const SUPABASE_URL='https://kepbwovgwvsfycmvsztu.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcGJ3b3Znd3ZzZnljbXZzenR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0OTkxNDMsImV4cCI6MjA5MDA3NTE0M30.cAS58qI-4N1Ddgrd4tqIxwjOj_u5l2QL5yNmXQVRr7c';
 
-const TIERS=[null,
-  {name:'Ash',      icon:'🪨',cls:'t1',score:1},
-  {name:'Ember',    icon:'🔥',cls:'t2',score:3},
-  {name:'Spark',    icon:'✨',cls:'t3',score:7},
-  {name:'Flame',    icon:'🌟',cls:'t4',score:15},
-  {name:'Blaze',    icon:'💥',cls:'t5',score:31},
-  {name:'Inferno',  icon:'🌋',cls:'t6',score:63},
-  {name:'Plasma',   icon:'⚡',cls:'t7',score:127},
-  {name:'The Forge',icon:'♾', cls:'t8',score:255},
-];
+// ── TILE THEMES ──
+const TILE_THEMES = {
+  alchemy: [null,{name:'Ash',icon:'🪨'},{name:'Ember',icon:'🔥'},{name:'Spark',icon:'✨'},{name:'Flame',icon:'🌟'},{name:'Blaze',icon:'💥'},{name:'Inferno',icon:'🌋'},{name:'Plasma',icon:'⚡'},{name:'The Forge',icon:'♾'}],
+  nature:  [null,{name:'Seed',icon:'🌱'},{name:'Sprout',icon:'🌿'},{name:'Tree',icon:'🌳'},{name:'Forest',icon:'🌲'},{name:'Storm',icon:'⛈️'},{name:'Mountain',icon:'🏔️'},{name:'Volcano',icon:'🌋'},{name:'World',icon:'🌍'}],
+  cosmos:  [null,{name:'Dust',icon:'💨'},{name:'Comet',icon:'☄️'},{name:'Moon',icon:'🌙'},{name:'Planet',icon:'🪐'},{name:'Star',icon:'⭐'},{name:'Nova',icon:'💫'},{name:'Galaxy',icon:'🌌'},{name:'Cosmos',icon:'✨'}],
+  dragon:  [null,{name:'Egg',icon:'🥚'},{name:'Hatch',icon:'🐣'},{name:'Drake',icon:'🦎'},{name:'Wyvern',icon:'🐲'},{name:'Dragon',icon:'🐉'},{name:'Elder',icon:'⚔️'},{name:'Ancient',icon:'💎'},{name:'Eternal',icon:'♾'}],
+};
+const SCORE=[0,1,3,7,15,31,63,127,255];
+const CLS=['','t1','t2','t3','t4','t5','t6','t7','t8'];
 const MAX_TIER=8;
 
-let gridSize=4,winCond='both';
+let currentTheme='alchemy';
+function TIERS(){ return TILE_THEMES[currentTheme]; }
+function TIER(n){ const t=TIERS()[n]; return t?{...t,cls:CLS[n],score:SCORE[n]}:null; }
+
+// ── GAME MODE: 'classic' | 'countdown' | 'stopwatch' ──
+let gameMode2='classic'; // renamed to avoid clash with FORGE's existing gameMode var
+let gridSize=4,winCond='both',countdownSecs=120;
 let board=[],selected=null;
 let score=0,merges=0,highestTier=1;
 let gameOver=false,soundOn=false,tileSize=88;
@@ -445,18 +558,58 @@ function sndNoMatch(){beep(200,0.12,'sawtooth',0.06);}
 function sndMerge(t){[t*70+180,t*70+280].forEach((f,i)=>beep(f,0.13,'sine',0.11,i*0.06));}
 function sndForge(){[500,700,900,1100].forEach((f,i)=>beep(f,0.16,'sine',0.15,i*0.08));}
 function sndFail(){beep(180,0.18,'sawtooth',0.07);}
+function sndTick(){beep(880,0.05,'square',0.05);}
 
 document.getElementById('sound-btn').onclick=()=>{soundOn=!soundOn;document.getElementById('sound-btn').textContent=soundOn?'🔊':'🔇';};
 
 // ── SETUP ──
+// ── SETUP NAVIGATION ──
+function pickMode(m){
+  gameMode2=m;
+  // update badge
+  const badges={classic:'⚗ Classic',countdown:'⏳ Countdown',stopwatch:'⏱ Stopwatch'};
+  const subs={classic:'Merge to The Forge, no time limit',countdown:'Merge as much as possible before time runs out',stopwatch:'How fast can you reach The Forge?'};
+  document.getElementById('settings-mode-badge').textContent=badges[m];
+  document.getElementById('settings-mode-sub').textContent=subs[m];
+  // show/hide sections
+  document.getElementById('section-countdown').style.display=m==='countdown'?'block':'none';
+  document.getElementById('section-wincond').style.display=m==='countdown'?'none':'block';
+  // go to settings screen
+  document.getElementById('screen-mode').classList.add('hidden');
+  document.getElementById('screen-settings').classList.remove('hidden');
+  renderThemePreview();
+}
+function goModeSelect(){
+  document.getElementById('screen-settings').classList.add('hidden');
+  document.getElementById('screen-mode').classList.remove('hidden');
+}
 function setGrid(n){
-  gridSize=n;[4,5,6].forEach(x=>{const el=document.getElementById('g'+x);el.classList.toggle('selected',x===n);el.querySelector('.opt-card-check').textContent=x===n?'✓':'';});
+  gridSize=n;['g4','g5','g6'].forEach(id=>{document.getElementById(id)?.classList.toggle('active',parseInt(id.slice(1))===n);});
 }
 function setWin(w){
-  winCond=w;['both','top','fill'].forEach(x=>{const el=document.getElementById('wc-'+x);el.classList.toggle('selected',x===w);el.querySelector('.opt-card-check').textContent=x===w?'✓':'';});
+  winCond=w;['both','top','fill'].forEach(x=>{
+    const el=document.getElementById('wc-'+x);
+    if(!el)return;
+    el.classList.toggle('selected',x===w);
+    const chk=el.querySelector('.opt-card-check');
+    if(chk)chk.textContent=x===w?'✓':'';
+  });
 }
-function goStep1(){document.getElementById('screen-win').classList.add('hidden');document.getElementById('screen-grid').classList.remove('hidden');}
-function goStep2(){document.getElementById('screen-grid').classList.add('hidden');document.getElementById('screen-win').classList.remove('hidden');}
+function setTheme(t){
+  currentTheme=t;
+  ['alchemy','nature','cosmos','dragon'].forEach(id=>{document.getElementById('th-'+id)?.classList.toggle('active',id===t);});
+  renderThemePreview();
+}
+function setCountdown(s){
+  countdownSecs=s;
+  [60,120,300].forEach(v=>{document.getElementById('t'+v)?.classList.toggle('active',v===s);});
+}
+function renderThemePreview(){
+  const el=document.getElementById('theme-preview');
+  if(!el)return;
+  const t=TILE_THEMES[currentTheme];
+  el.innerHTML=t.slice(1,6).map((tier,i)=>`<span class="tp-chip">${tier.icon} ${tier.name}</span>`).join('')+'<span class="tp-chip" style="opacity:0.5">+3 more</span>';
+}
 
 // ── HEADER STATE ──
 function setHeaderState(inGame){document.getElementById('header').classList.toggle('on-menu',!inGame);}
@@ -464,7 +617,7 @@ function setHeaderState(inGame){document.getElementById('header').classList.togg
 // ── MODALS ──
 function openAbandon(){document.getElementById('abandon-modal').classList.add('show');}
 function closeAbandon(){document.getElementById('abandon-modal').classList.remove('show');}
-function confirmAbandon(){document.getElementById('abandon-modal').classList.remove('show');goMenu();}
+function confirmAbandon(){document.getElementById('abandon-modal').classList.remove('show');stopTimer2();goMenu();}
 function openHow(){document.getElementById('how-modal').classList.add('show');}
 function closeHow(){document.getElementById('how-modal').classList.remove('show');}
 ['abandon-modal','how-modal'].forEach(id=>{
@@ -472,16 +625,73 @@ function closeHow(){document.getElementById('how-modal').classList.remove('show'
 });
 
 // ── GAME INIT ──
+// ── TIMER STATE ──
+let timerInterval2=null,timerSecs2=0,timerRunning=false;
+
+function fmtTimer(s){const m=Math.floor(s/60),sec=s%60;return `${m}:${String(sec).padStart(2,'0')}`;}
+
+function startCountdown(){
+  timerRunning=true;timerSecs2=countdownSecs;
+  const tv=document.getElementById('hud-timer-val');
+  const flash=document.getElementById('timer-flash');
+  timerInterval2=setInterval(()=>{
+    if(!timerRunning||gameOver)return;
+    timerSecs2=Math.max(0,timerSecs2-1);
+    tv.textContent=fmtTimer(timerSecs2);
+    if(timerSecs2<=10&&timerSecs2>0){
+      tv.className='hud-val sm timer-danger';
+      if(flash){flash.className='timer-flash danger show';setTimeout(()=>{if(flash)flash.className='timer-flash danger';},200);}
+      if(soundOn)sndTick();
+    } else if(timerSecs2<=30){
+      tv.className='hud-val sm timer-warn';
+      if(timerSecs2%5===0&&flash){flash.className='timer-flash warn show';setTimeout(()=>{if(flash)flash.className='timer-flash warn';},300);}
+    }
+    if(timerSecs2<=0){clearInterval(timerInterval2);timerRunning=false;endGame(false,'timeout');}
+  },1000);
+}
+
+function startStopwatch(){
+  timerRunning=true;timerSecs2=0;
+  const tv=document.getElementById('hud-timer-val');
+  timerInterval2=setInterval(()=>{if(!timerRunning||gameOver)return;timerSecs2++;tv.textContent=fmtTimer(timerSecs2);},1000);
+}
+
+function stopTimer2(){
+  timerRunning=false;
+  if(timerInterval2){clearInterval(timerInterval2);timerInterval2=null;}
+}
+
 function startGame(){
   score=0;merges=0;highestTier=1;gameOver=false;selected=null;
+  stopTimer2();
   board=Array.from({length:gridSize},()=>Array(gridSize).fill(0));
   const maxW=Math.min(window.innerWidth-48,520);
   tileSize=Math.floor((maxW-(gridSize-1)*6)/gridSize);
   tileSize=Math.max(58,Math.min(tileSize,96));
-  // spawn 3 tiles ensuring at least one adjacent pair possible
   spawnTile();spawnTile();spawnAdjacentTile(1);
   buildGrid();updateHUD();updatePips();
-  ['screen-grid','screen-win'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+
+  // Timer HUD setup
+  const tb=document.getElementById('hud-timer-block');
+  const tv=document.getElementById('hud-timer-val');
+  const tl=document.getElementById('hud-timer-label');
+  const flash=document.getElementById('timer-flash');
+  if(flash)flash.className='timer-flash';
+  if(gameMode2==='countdown'){
+    tb.style.display='flex';tl.textContent='Time Left';
+    tv.textContent=fmtTimer(countdownSecs);tv.className='hud-val sm';
+    startCountdown();
+  } else if(gameMode2==='stopwatch'){
+    tb.style.display='flex';tl.textContent='Time';
+    tv.textContent='0:00';tv.className='hud-val sm';
+    startStopwatch();
+  } else {
+    tb.style.display='none';
+  }
+
+  ['screen-mode','screen-settings','screen-grid','screen-win'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.classList.add('hidden');
+  });
   document.getElementById('game-screen').classList.remove('hidden');
   document.getElementById('result-overlay').classList.remove('show');
   setHeaderState(true);
@@ -489,35 +699,110 @@ function startGame(){
 }
 
 // Spawn near existing tile to ensure adjacency opportunities
-function spawnAdjacentTile(tier){
-  const occupied=[];
-  for(let r=0;r<gridSize;r++)for(let c=0;c<gridSize;c++)if(board[r][c])occupied.push([r,c]);
-  const dirs=[[-1,0],[1,0],[0,-1],[0,1]];
-  const candidates=[];
-  for(const[or,oc]of occupied){
-    for(const[dr,dc]of dirs){
-      const nr=or+dr,nc=oc+dc;
-      if(nr>=0&&nr<gridSize&&nc>=0&&nc<gridSize&&!board[nr][nc])candidates.push([nr,nc]);
-    }
+
+// Rescue spawn — board has no merges left, force create one
+function spawnRescue(){
+  const empty=allEmpty();
+  if(!empty.length)return;
+  // Find all tiles with an empty neighbour
+  const rescueCandidates=[];
+  for(let r=0;r<gridSize;r++)for(let c=0;c<gridSize;c++){
+    if(!board[r][c]||board[r][c]>=MAX_TIER)continue;
+    const nbrs=emptyNeighbours(r,c);
+    if(nbrs.length>0)rescueCandidates.push({tier:board[r][c],nbrs});
   }
-  if(candidates.length){
-    const[r,c]=candidates[Math.floor(Math.random()*candidates.length)];
-    board[r][c]=tier||1;
-  }else{spawnTile();}
+  if(!rescueCandidates.length){spawnTile(true);return;}
+  // pick the lowest-tier rescue (helps mid-game)
+  rescueCandidates.sort((a,b)=>a.tier-b.tier);
+  const pick=rescueCandidates[0];
+  const[nr,nc]=pick.nbrs[Math.floor(Math.random()*pick.nbrs.length)];
+  board[nr][nc]=pick.tier;
+  const el=getTileEl(nr,nc);
+  if(el){renderTile(el,nr,nc);el.classList.add('spawn-anim');setTimeout(()=>el.classList.remove('spawn-anim'),300);}
 }
 
+// ── SMART SPAWN — always tries to create a mergeable pair ──
+const DIRS=[[-1,0],[1,0],[0,-1],[0,1]];
+
+function emptyNeighbours(r,c){
+  return DIRS.map(([dr,dc])=>[r+dr,c+dc])
+    .filter(([nr,nc])=>nr>=0&&nr<gridSize&&nc>=0&&nc<gridSize&&!board[nr][nc]);
+}
+function allEmpty(){
+  const e=[];
+  for(let r=0;r<gridSize;r++)for(let c=0;c<gridSize;c++)if(!board[r][c])e.push([r,c]);
+  return e;
+}
+function hasMerge(){
+  for(let r=0;r<gridSize;r++)for(let c=0;c<gridSize;c++){
+    if(!board[r][c])continue;
+    if(c+1<gridSize&&board[r][c]===board[r][c+1])return true;
+    if(r+1<gridSize&&board[r][c]===board[r+1][c])return true;
+  }
+  return false;
+}
+
+// Spawn one tile. Smart mode: tries to place a tile matching an existing neighbour.
+// Falls back to adjacent empty, then any empty.
 function spawnTile(animate=false){
-  const empty=[];
-  for(let r=0;r<gridSize;r++)for(let c=0;c<gridSize;c++)if(!board[r][c])empty.push([r,c]);
+  const empty=allEmpty();
   if(!empty.length)return false;
-  // prefer cells adjacent to existing tiles
-  const dirs=[[-1,0],[1,0],[0,-1],[0,1]];
-  const adjacent=empty.filter(([r,c])=>dirs.some(([dr,dc])=>{const nr=r+dr,nc=c+dc;return nr>=0&&nr<gridSize&&nc>=0&&nc<gridSize&&board[nr][nc]>0;}));
-  const pool=adjacent.length?adjacent:empty;
-  const[r,c]=pool[Math.floor(Math.random()*pool.length)];
-  board[r][c]=Math.random()<0.82?1:2;
-  if(animate){const el=getTileEl(r,c);if(el){renderTile(el,r,c);el.classList.add('spawn-anim');setTimeout(()=>el.classList.remove('spawn-anim'),300);}}
+
+  let chosenR=-1,chosenC=-1,chosenTier=1;
+
+  // Priority 1: place a tile that MATCHES an existing neighbour (creates instant pair)
+  const matchCandidates=[];
+  for(const[r,c]of empty){
+    for(const[dr,dc]of DIRS){
+      const nr=r+dr,nc=c+dc;
+      if(nr>=0&&nr<gridSize&&nc>=0&&nc<gridSize&&board[nr][nc]>0&&board[nr][nc]<MAX_TIER){
+        matchCandidates.push({r,c,tier:board[nr][nc]});
+      }
+    }
+  }
+
+  if(matchCandidates.length&&Math.random()<0.62){
+    // 62% chance to use a match-creating spawn (keeps game from being too easy)
+    const pick=matchCandidates[Math.floor(Math.random()*matchCandidates.length)];
+    chosenR=pick.r; chosenC=pick.c; chosenTier=pick.tier;
+  } else {
+    // Priority 2: adjacent to any existing tile
+    const adjEmpty=empty.filter(([r,c])=>DIRS.some(([dr,dc])=>{
+      const nr=r+dr,nc=c+dc;
+      return nr>=0&&nr<gridSize&&nc>=0&&nc<gridSize&&board[nr][nc]>0;
+    }));
+    const pool=adjEmpty.length?adjEmpty:empty;
+    const[r,c]=pool[Math.floor(Math.random()*pool.length)];
+    chosenR=r; chosenC=c;
+    chosenTier=Math.random()<0.80?1:2;
+  }
+
+  board[chosenR][chosenC]=chosenTier;
+  if(animate){
+    const el=getTileEl(chosenR,chosenC);
+    if(el){renderTile(el,chosenR,chosenC);el.classList.add('spawn-anim');setTimeout(()=>el.classList.remove('spawn-anim'),300);}
+  }
   return true;
+}
+
+// Legacy alias used in startGame
+function spawnAdjacentTile(tier){
+  // Just use smart spawn but force a matching tile
+  const empty=allEmpty();
+  if(!empty.length)return;
+  const matchCandidates=[];
+  for(const[r,c]of empty){
+    for(const[dr,dc]of DIRS){
+      const nr=r+dr,nc=c+dc;
+      if(nr>=0&&nr<gridSize&&nc>=0&&nc<gridSize&&board[nr][nc]===tier){
+        matchCandidates.push([r,c]);
+      }
+    }
+  }
+  if(matchCandidates.length){
+    const[r,c]=matchCandidates[Math.floor(Math.random()*matchCandidates.length)];
+    board[r][c]=tier;
+  } else { spawnTile(); }
 }
 
 function buildGrid(){
@@ -537,7 +822,7 @@ function getTileEl(r,c){return document.querySelector(`.tile[data-r="${r}"][data
 function renderTile(el,r,c){
   const t=board[r][c];el.className='tile';el.style.width=el.style.height=tileSize+'px';el.innerHTML='';
   if(!t){el.classList.add('empty');return;}
-  const tier=TIERS[t];el.classList.add(tier.cls);
+  const tier=TIER(t);el.classList.add(tier.cls);
   const iSize=Math.round(tileSize*0.36),nSize=Math.round(tileSize*0.13);
   el.innerHTML=`<span class="tile-icon" style="font-size:${iSize}px">${tier.icon}</span><span class="tile-name" style="font-size:${nSize}px">${tier.name}</span>`;
 }
@@ -574,26 +859,35 @@ function clearSelection(){if(selected){getTileEl(selected[0],selected[1])?.class
 function doMerge(r1,c1,r2,c2){
   const tier=board[r1][c1],newTier=Math.min(tier+1,MAX_TIER);
   board[r1][c1]=0;board[r2][c2]=newTier;
-  score+=TIERS[newTier].score;merges++;
+  score+=TIER(newTier).score;merges++;
   if(newTier>highestTier)highestTier=newTier;
   const el1=getTileEl(r1,c1),el2=getTileEl(r2,c2);
   if(el1)renderTile(el1,r1,c1);
   if(el2){renderTile(el2,r2,c2);el2.classList.add('merge-flash');setTimeout(()=>el2.classList.remove('merge-flash'),400);}
   selected=null;sndMerge(newTier);if(newTier===MAX_TIER)sndForge();
   updateHUD();updatePips();
-  setTimeout(()=>{spawnTile(true);if(Math.random()<0.3)spawnTile(true);checkGameOver();},160);
+  setTimeout(()=>{
+    spawnTile(true);
+    // If board now has no merges possible, force a rescue spawn that creates a pair
+    if(!hasMerge()&&allEmpty().length>0){
+      spawnRescue();
+    } else if(Math.random()<0.25){
+      spawnTile(true);
+    }
+    checkGameOver();
+  },160);
 }
 
 function updateHUD(){
   document.getElementById('hud-score').textContent=score.toLocaleString();
   document.getElementById('hud-merges').textContent=merges;
-  document.getElementById('hud-tier').textContent=TIERS[highestTier]?.name||'—';
+  document.getElementById('hud-tier').textContent=TIER(highestTier)?.name||'—';
   const best=localStorage.getItem(`forge_best_${gridSize}`);
   document.getElementById('hud-best').textContent=best?Number(best).toLocaleString():'—';
 }
 function updatePips(){
   for(let i=1;i<=8;i++)document.getElementById('pip'+i)?.classList.toggle('unlocked',i<=highestTier);
-  const tl=document.getElementById('tier-label');if(tl)tl.textContent=TIERS[highestTier]?.name||'';
+  const tl=document.getElementById('tier-label');if(tl)tl.textContent=TIER(highestTier)?.name||'';
 }
 
 function checkGameOver(){
@@ -610,22 +904,41 @@ function checkGameOver(){
 }
 
 function endGame(win,reason){
-  gameOver=true;if(!win)sndFail();
+  gameOver=true;stopTimer2();if(!win&&reason!=='timeout')sndFail();
   const key=`forge_best_${gridSize}`,prev=localStorage.getItem(key);
   if(!prev||score>+prev)localStorage.setItem(key,score);
+  // best time for stopwatch
+  if(gameMode2==='stopwatch'&&win){
+    const tkey=`forge_time_${gridSize}`,tprev=localStorage.getItem(tkey);
+    if(!tprev||timerSecs2<+tprev)localStorage.setItem(tkey,timerSecs2);
+  }
   pingActive('');
   setTimeout(()=>showResult(win,reason),350);
 }
 function showResult(win,reason){
-  const icons={forge:'♾',survived:'🏆',full:'💀'};
-  const titles={forge:'The Forge',survived:'Survived',full:'Grid Sealed'};
-  const subs={forge:'You reached the pinnacle of alchemy.',survived:'The grid filled — you held on longest.',full:'No more transmutations possible.'};
+  const icons={forge:'♾',survived:'🏆',full:'💀',timeout:'⏰'};
+  const titles={forge:'The Forge',survived:'Survived',full:'Grid Sealed',timeout:"Time's Up"};
+  const subs={
+    forge: gameMode2==='stopwatch'?`Completed in ${fmtTimer(timerSecs2)}!`:'You reached the pinnacle of alchemy.',
+    survived:'The grid filled — you held on longest.',
+    full:'No more transmutations possible.',
+    timeout:`You scored ${score.toLocaleString()} in ${fmtTimer(countdownSecs)}.`,
+  };
   document.getElementById('result-icon').textContent=icons[reason];
   const rt=document.getElementById('result-title');rt.textContent=titles[reason];rt.className='result-title'+(win?' fire':'');
   document.getElementById('result-sub').textContent=subs[reason];
   document.getElementById('res-score').textContent=score.toLocaleString();
   document.getElementById('res-merges').textContent=merges;
-  document.getElementById('res-tier').textContent=TIERS[highestTier]?.name;
+  document.getElementById('res-tier').textContent=TIER(highestTier)?.name||'—';
+  // Show time in result stats for timed modes
+  const resTimeBlock=document.querySelector('#result-overlay .stat-block:last-child');
+  if(resTimeBlock&&gameMode2!=='classic'){
+    resTimeBlock.querySelector('.stat-label').textContent=gameMode2==='stopwatch'?'Time':'Used';
+    resTimeBlock.querySelector('.stat-val').textContent=fmtTimer(timerSecs2);
+  } else if(resTimeBlock){
+    resTimeBlock.querySelector('.stat-label').textContent='Top Tier';
+    resTimeBlock.querySelector('.stat-val').textContent=TIER(highestTier)?.name||'—';
+  }
   document.getElementById('submit-msg').textContent='';
   document.getElementById('submit-score-btn').disabled=false;
   document.getElementById('result-overlay').classList.add('show');
@@ -641,7 +954,7 @@ async function submitScoreHandler(){
   }catch(e){document.getElementById('submit-msg').textContent='Failed — try again';document.getElementById('submit-score-btn').disabled=false;}
 }
 
-function restartGame(){document.getElementById('result-overlay').classList.remove('show');startGame();}
+function restartGame(){document.getElementById('result-overlay').classList.remove('show');stopTimer2();startGame();}
 function goMenu(){
   document.getElementById('result-overlay').classList.remove('show');
   gameOver=true;
@@ -661,10 +974,10 @@ function pingActive(val){fetch(`${SUPABASE_URL}/rest/v1/meta?key=eq.active_game`
 // ── DESKTOP HINT ──
 setTimeout(()=>{
   const h=document.getElementById('desktop-hint');
-  h.style.opacity='1';
+  h.classList.add('hint-visible');
   const fade=()=>h.classList.add('hidden-hint');
   document.addEventListener('click',fade,{once:true});
-  document.addEventListener('touchstart',fade,{once:true});
+  document.addEventListener('touchstart',fade,{once:true,passive:true});
   setTimeout(()=>h.classList.add('hidden-hint'),8000);
 },1500);
 </script>
