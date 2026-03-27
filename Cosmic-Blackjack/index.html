@@ -322,7 +322,7 @@ body {
 .ob-text { font-family: 'Rajdhani', sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); white-space: nowrap; }
 .ob-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--cyan); opacity: 0.5; flex-shrink: 0; }
 @media (hover: none) and (pointer: coarse) { #orient-banner { display: flex; } }
-@media (hover: none) and (pointer: coarse) and (orientation: landscape) { #orient-banner { display: none !important; } }
+#orient-banner.hint-hidden { opacity: 0 !important; pointer-events: none; }
 
 #screen-game { justify-content: flex-start; padding: 0; min-height: 100vh; min-height: 100dvh; overflow-y: auto; }
 
@@ -580,6 +580,27 @@ body {
 .trail-particle { position: fixed; pointer-events: none; z-index: 199; width: 4px; height: 4px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 6px var(--cyan); animation: particleFade 0.6s ease-out forwards; }
 @keyframes particleFade { 0% { opacity: 0.9; transform: scale(1); } 100% { opacity: 0; transform: scale(0) translate(var(--tx), var(--ty)); } }
 
+/* ── GAME MODALS (abandon / how-to) ── */
+.gm-backdrop{position:fixed;inset:0;z-index:950;background:rgba(5,10,22,0.9);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity 0.25s;}
+.gm-backdrop.show{opacity:1;pointer-events:all;}
+.gm-card{background:#0d1830;border:1px solid rgba(24,240,255,0.28);border-radius:16px;padding:28px 28px 22px;max-width:340px;width:100%;text-align:center;box-shadow:0 0 30px rgba(24,240,255,0.12);}
+.gm-title{font-family:'Orbitron',monospace;font-size:17px;font-weight:900;letter-spacing:2px;color:#fff;margin-bottom:8px;}
+.gm-sub{font-family:'Rajdhani',sans-serif;font-size:13px;color:rgba(224,247,250,0.6);margin-bottom:20px;line-height:1.5;}
+.gm-btns{display:flex;gap:8px;}
+.gm-btn{flex:1;padding:10px;border-radius:8px;cursor:pointer;font-family:'Orbitron',monospace;font-size:10px;font-weight:700;letter-spacing:2px;transition:all 0.2s;border:1px solid;}
+.gm-btn.cancel{background:none;border-color:rgba(24,240,255,0.2);color:rgba(224,247,250,0.6);}
+.gm-btn.cancel:hover{border-color:rgba(24,240,255,0.4);color:#fff;}
+.gm-btn.confirm{background:rgba(255,92,122,0.1);border-color:#ff5c7a;color:#ff5c7a;}
+.gm-btn.confirm:hover{background:rgba(255,92,122,0.22);}
+.how-step-vj{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;text-align:left;}
+.how-num-vj{width:22px;height:22px;border-radius:50%;flex-shrink:0;background:var(--cyan);color:#080f20;font-size:11px;font-weight:700;font-family:'Orbitron',monospace;display:flex;align-items:center;justify-content:center;}
+.how-step-title-vj{font-family:'Orbitron',monospace;font-size:11px;letter-spacing:1px;color:#fff;margin-bottom:2px;}
+.how-step-desc-vj{font-family:'Rajdhani',sans-serif;font-size:12px;color:rgba(224,247,250,0.6);line-height:1.5;}
+.gm-close{margin-top:14px;width:100%;padding:10px;border-radius:8px;border:1px solid rgba(24,240,255,0.25);background:none;color:var(--cyan);font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;cursor:pointer;transition:all 0.2s;}
+.gm-close:hover{background:rgba(24,240,255,0.1);}
+.help-btn-vj{width:28px;height:28px;border-radius:50%;background:none;border:1px solid rgba(24,240,255,0.25);color:rgba(224,247,250,0.7);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.help-btn-vj:hover{border-color:var(--cyan);color:var(--cyan);}
+
 /* ── TOAST ── */
 #toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%) translateY(-10px); padding: 10px 24px; border-radius: 30px; font-family: 'Orbitron', monospace; font-size: 12px; letter-spacing: 2px; background: rgba(7,13,26,0.95); border: 1px solid var(--cyan); color: var(--cyan); box-shadow: var(--cyan-glow); z-index: 1000; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; }
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -810,7 +831,7 @@ body {
 <!-- Orientation note -->
 <div id="orient-banner">
   <div class="ob-dot"></div>
-  <span class="ob-text">Best on desktop · Mobile: rotate landscape</span>
+  <span class="ob-text">Best experienced on desktop</span>
   <div class="ob-dot"></div>
 </div>
 
@@ -835,7 +856,8 @@ body {
         <div class="mc-sub">2–10 players<br>pass &amp; play</div>
       </div>
     </div>
-    <a href="../index.html" style="font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--text-dim);text-decoration:none;opacity:0.5;transition:opacity 0.2s;margin-top:-24px;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.5'">← THE GRID</a>
+    <button class="help-btn-vj" onclick="openHowVJ()" title="How to play" style="margin-top:0px;">?</button>
+    <a href="../index.html" style="font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--text-dim);text-decoration:none;opacity:0.5;transition:opacity 0.2s;margin-top:4px;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.5'">← THE GRID</a>
   </div>
 
   <!-- ══ SCREEN 2a: PLAYER COUNT (Multiplayer only) ══ -->
@@ -1020,6 +1042,7 @@ body {
         <div class="mode-pill freeplay" id="mode-pill">FREE PLAY</div>
       </div>
       <div class="header-right">
+        <button class="help-btn-vj" id="help-btn-vj" onclick="openHowVJ()" title="How to play">?</button>
         <button class="sound-toggle" id="sound-toggle" title="Toggle sound">🔊</button>
         <button class="btn-menu" id="btn-end-game" style="border-color:rgba(255,92,122,0.35);color:var(--red);">END</button>
         <button class="btn-menu" id="btn-back">← LOBBY</button>
@@ -1242,6 +1265,30 @@ body {
 <!-- Toast -->
 <div id="toast"></div>
 
+<!-- ABANDON MODAL -->
+<div class="gm-backdrop" id="vj-abandon-modal">
+  <div class="gm-card">
+    <div class="gm-title">LEAVE THE VOID?</div>
+    <div class="gm-sub">Your current session will end and you'll return to the lobby.</div>
+    <div class="gm-btns">
+      <button class="gm-btn cancel" onclick="closeAbandonVJ()">STAY</button>
+      <button class="gm-btn confirm" onclick="confirmAbandonVJ()">LEAVE</button>
+    </div>
+  </div>
+</div>
+
+<!-- HOW TO PLAY MODAL -->
+<div class="gm-backdrop" id="vj-how-modal">
+  <div class="gm-card" style="text-align:left;max-width:380px;">
+    <div class="gm-title" style="text-align:center;margin-bottom:16px;">HOW TO PLAY</div>
+    <div class="how-step-vj"><div class="how-num-vj">1</div><div><div class="how-step-title-vj">PLACE YOUR BET</div><div class="how-step-desc-vj">Each player bets chips before cards are dealt. Min and max bets are set at setup.</div></div></div>
+    <div class="how-step-vj"><div class="how-num-vj">2</div><div><div class="how-step-title-vj">HIT OR STAND</div><div class="how-step-desc-vj">Get as close to 21 as possible. Hit to draw a card, Stand to hold. Double doubles your bet and draws one final card. Split divides a matching pair into two hands.</div></div></div>
+    <div class="how-step-vj"><div class="how-num-vj">3</div><div><div class="how-step-title-vj">BEAT THE DEALER</div><div class="how-step-desc-vj">Dealer hits to 17 then stands. Beat the dealer's score to win your bet. Blackjack (Ace + 10-value card) pays 2.5×. Busting over 21 means instant loss.</div></div></div>
+    <div class="how-step-vj"><div class="how-num-vj">4</div><div><div class="how-step-title-vj">PASS THE DEVICE</div><div class="how-step-desc-vj">In multiplayer, each player takes their turn privately then passes the device. Cards are hidden until each player taps Reveal.</div></div></div>
+    <button class="gm-close" onclick="closeHowVJ()">✕ GOT IT</button>
+  </div>
+</div>
+
 <!-- Round Overlay -->
 <div id="round-overlay">
   <div class="round-card">
@@ -1260,7 +1307,7 @@ body {
 let soundEnabled = true;
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let ctx;
-function getCtx() { if (!ctx) ctx = new AudioCtx(); return ctx; }
+function getCtx() { if (!ctx) ctx = new AudioCtx(); try { if (ctx.state === 'suspended') ctx.resume(); } catch(e){} return ctx; }
 function playTone(freq, dur, type='sine', vol=0.15, delay=0) {
   if (!soundEnabled) return;
   try {
@@ -2112,7 +2159,7 @@ window.playerHit = function(i) {
     const tEl = document.getElementById(`split-hand-${i}`);
     if (tEl&&deckEl) { const r=tEl.getBoundingClientRect(); spawnTrail(deckEl,r.left+p.splitHand.length*16,r.top,null); }
     const ss = handScore(p.splitHand);
-    if (ss>21){p.splitBust=true;p.awaitingPass=true;sfxBust();} else if(ss===21){p.awaitingPass=true;}
+    if (ss>21){p.splitBust=true;p.awaitingPass=true;sfxBust();} else if(ss===21){p.stood=true;p.awaitingPass=true;} // auto-stand split at 21
   } else {
     p.hand.push(card);
     const tEl = document.getElementById(`hand-${i}`);
@@ -2122,8 +2169,8 @@ window.playerHit = function(i) {
       if (p.splitHand&&!p.playingSplit){p.mainBust=true;p.playingSplit=true;sfxBust();}
       else {p.bust=true;p.result='lose';sfxBust();p.awaitingPass=true;}
     } else if (score===21) {
-      if (p.splitHand&&!p.playingSplit) p.playingSplit=true;
-      else p.awaitingPass=true;
+      if (p.splitHand&&!p.playingSplit) { p.playingSplit=true; } // auto-advance to split hand
+      else { p.stood=true; p.awaitingPass=true; } // auto-stand at 21
     }
   }
   renderPlayers();
@@ -2480,9 +2527,14 @@ document.getElementById('eg-menu').onclick = () => {
 };
 
 document.getElementById('btn-back').onclick = () => {
-  document.getElementById('screen-game').classList.remove('active');
-  document.getElementById('round-overlay').classList.remove('show');
-  showScreen('screen-mode');
+  // Only show abandon confirm if game is actively in progress
+  if (G && G.players && G.phase && G.phase !== 'betting' && G.round > 0) {
+    document.getElementById('vj-abandon-modal').classList.add('show');
+  } else {
+    document.getElementById('screen-game').classList.remove('active');
+    document.getElementById('round-overlay').classList.remove('show');
+    showScreen('screen-mode');
+  }
 };
 
 document.getElementById('overlay-next').onclick = startNextRound;
@@ -2628,6 +2680,36 @@ function toast(msg, dur=2200) {
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), dur);
 }
+
+// ── ABANDON MODAL ──
+function closeAbandonVJ() { document.getElementById('vj-abandon-modal').classList.remove('show'); }
+function confirmAbandonVJ() {
+  document.getElementById('vj-abandon-modal').classList.remove('show');
+  document.getElementById('screen-game').classList.remove('active');
+  document.getElementById('round-overlay').classList.remove('show');
+  showScreen('screen-mode');
+}
+
+// ── HOW TO PLAY ──
+function openHowVJ() { document.getElementById('vj-how-modal').classList.add('show'); }
+function closeHowVJ() { document.getElementById('vj-how-modal').classList.remove('show'); }
+document.getElementById('vj-how-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('vj-how-modal')) closeHowVJ();
+});
+document.getElementById('vj-abandon-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('vj-abandon-modal')) closeAbandonVJ();
+});
+
+// ── DESKTOP HINT — fade on first interaction ──
+(function() {
+  const h = document.getElementById('orient-banner');
+  if (!h) return;
+  const fade = () => h.classList.add('hint-hidden');
+  document.addEventListener('click', fade, { once: true });
+  document.addEventListener('touchstart', fade, { once: true, passive: true });
+  setTimeout(() => h.classList.add('hint-hidden'), 9000);
+})();
+
 </script>
 </body>
 </html>
