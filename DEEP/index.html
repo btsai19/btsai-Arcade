@@ -120,6 +120,89 @@ body::after {
 }
 #menu-btn:hover { border-color: var(--border-h); color: var(--text); }
 
+/* header items hidden on menu screens */
+#header.on-menu #portal-btn,
+#header.on-menu #menu-btn,
+#header.on-menu #pause-btn,
+#header.on-menu #help-btn { display: none; }
+
+/* help button */
+#help-btn {
+  background: none; border: 1px solid var(--border);
+  color: var(--text-dim); font-size: 13px; font-weight: 700;
+  width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+#help-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+
+/* ── ABANDON MODAL ── */
+#abandon-modal {
+  position: fixed; inset: 0; z-index: 400;
+  background: rgba(5,13,26,0.82); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+  opacity: 0; pointer-events: none; transition: opacity 0.25s;
+}
+#abandon-modal.show { opacity: 1; pointer-events: all; }
+.abandon-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 28px 28px 22px;
+  max-width: 320px; width: 100%; text-align: center;
+}
+.abandon-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 20px; font-weight: 700; letter-spacing: 0.1em;
+  color: var(--text); margin-bottom: 8px;
+}
+.abandon-sub { font-size: 13px; color: var(--text-dim); margin-bottom: 22px; line-height: 1.5; }
+.abandon-btns { display: flex; gap: 8px; }
+.abandon-btn {
+  flex: 1; padding: 10px; border-radius: 8px; cursor: pointer;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; font-weight: 700; letter-spacing: 0.1em;
+  transition: all 0.2s; border: 1px solid transparent;
+}
+.abandon-btn.cancel { background: none; border-color: var(--border); color: var(--text-dim); }
+.abandon-btn.cancel:hover { border-color: var(--border-h); color: var(--text); }
+.abandon-btn.confirm { background: var(--red-dim); border-color: var(--red); color: var(--red); }
+.abandon-btn.confirm:hover { background: rgba(255,77,109,0.25); }
+
+/* ── HOW TO PLAY MODAL ── */
+#how-modal {
+  position: fixed; inset: 0; z-index: 400;
+  background: rgba(5,13,26,0.82); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+  opacity: 0; pointer-events: none; transition: opacity 0.25s;
+}
+#how-modal.show { opacity: 1; pointer-events: all; }
+.how-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 26px 26px 22px;
+  max-width: 380px; width: 100%;
+}
+.how-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.how-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 20px; font-weight: 700; letter-spacing: 0.1em; color: var(--text);
+}
+.how-close {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 1px solid var(--border); background: none;
+  color: var(--text-dim); cursor: pointer; font-size: 12px;
+  display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+}
+.how-close:hover { border-color: var(--cyan); color: var(--cyan); }
+.how-steps { display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px; }
+.how-step { display: flex; gap: 12px; align-items: flex-start; }
+.how-num {
+  width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+  background: var(--cyan); color: var(--bg);
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.how-step-title { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.06em; color: var(--text); margin-bottom: 2px; }
+.how-step-desc { font-size: 11px; color: var(--text-dim); line-height: 1.5; }
+
 /* ── SCREENS ── */
 .screen {
   position: fixed; inset: 0; z-index: 50;
@@ -559,9 +642,7 @@ input[type=range]::-moz-range-progress {
   #desktop-hint { display: block; }
   :root { --cell-size: 30px; }
 }
-@media (hover: none) and (pointer: coarse) and (orientation: landscape) {
-  #desktop-hint { display: none !important; }
-}
+#desktop-hint.hidden-hint { opacity: 0 !important; pointer-events: none; }
 
 /* pause btn */
 #pause-btn {
@@ -603,13 +684,14 @@ input[type=range]::-moz-range-progress {
 <body>
 
 <!-- HEADER -->
-<header id="header">
+<header id="header" class="on-menu">
   <div id="header-left">
     <a href="../index.html" id="portal-btn" title="Back to THE GRID">⌂</a>
     <div id="game-logo">DEEP <span>ABYSS MINESWEEPER</span></div>
   </div>
   <div id="header-right">
     <span id="mode-badge">CLASSIC</span>
+    <button id="help-btn" onclick="openHow()" title="How to play">?</button>
     <button id="pause-btn" onclick="togglePause()">⏸ PAUSE</button>
     <button id="sound-btn" title="Toggle sound">🔊</button>
     <button id="menu-btn">← MENU</button>
@@ -637,6 +719,7 @@ input[type=range]::-moz-range-progress {
         </div>
       </div>
     </div>
+    <button style="margin-top:8px;background:none;border:1px solid var(--border);color:var(--text-dim);width:28px;height:28px;border-radius:50%;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onclick="openHow()" title="How to play" onmouseover="this.style.borderColor='var(--cyan)';this.style.color='var(--cyan)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">?</button>
     <a href="../index.html" class="portal-link">← THE GRID</a>
   </div>
 </div>
@@ -671,6 +754,7 @@ input[type=range]::-moz-range-progress {
       </div>
     </div>
     <button class="start-btn" onclick="startGame()">▶ DIVE IN</button>
+    <button style="margin-top:10px;background:none;border:1px solid var(--border);color:var(--text-dim);width:28px;height:28px;border-radius:50%;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onclick="openHow()" title="How to play" onmouseover="this.style.borderColor='var(--cyan)';this.style.color='var(--cyan)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">?</button>
   </div>
 </div>
 
@@ -740,6 +824,58 @@ input[type=range]::-moz-range-progress {
   </div>
 </div>
 
+<!-- ABANDON MODAL -->
+<div id="abandon-modal">
+  <div class="abandon-card">
+    <div class="abandon-title">ABANDON DIVE?</div>
+    <div class="abandon-sub">Your current progress will be lost and you'll return to the menu.</div>
+    <div class="abandon-btns">
+      <button class="abandon-btn cancel" onclick="closeAbandon()">KEEP DIVING</button>
+      <button class="abandon-btn confirm" onclick="confirmAbandon()">ABANDON</button>
+    </div>
+  </div>
+</div>
+
+<!-- HOW TO PLAY MODAL -->
+<div id="how-modal">
+  <div class="how-card">
+    <div class="how-header">
+      <div class="how-title">HOW TO PLAY</div>
+      <button class="how-close" onclick="closeHow()">✕</button>
+    </div>
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-num">1</div>
+        <div>
+          <div class="how-step-title">CLICK TO REVEAL</div>
+          <div class="how-step-desc">Left-click any cell to reveal it. Empty cells cascade automatically to all connected safe neighbours.</div>
+        </div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">2</div>
+        <div>
+          <div class="how-step-title">FLAG DEPTH CHARGES</div>
+          <div class="how-step-desc">Right-click (or long-press on mobile) to place an amber beacon on a cell you suspect hides a depth charge.</div>
+        </div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">3</div>
+        <div>
+          <div class="how-step-title">READ THE NUMBERS</div>
+          <div class="how-step-desc">Each number shows how many depth charges are hidden in the 8 surrounding cells. Use them to deduce safe cells.</div>
+        </div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">4</div>
+        <div>
+          <div class="how-step-title">PRESSURE MODE</div>
+          <div class="how-step-desc">The tide rises every 12 seconds, auto-revealing a row from the bottom. Move faster or the ocean decides for you.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- DESKTOP HINT -->
 <div id="desktop-hint">• BEST ON DESKTOP · MOBILE: ROTATE LANDSCAPE •</div>
 
@@ -767,6 +903,7 @@ let lastPreset = 'easy';
 
 // ── AUDIO ──
 const ctx = new (window.AudioContext || window.webkitAudioContext)();
+document.addEventListener('click', () => { try { if (ctx.state === 'suspended') ctx.resume(); } catch(e){} }, { once: true });
 function beep(freq, dur, type='sine', vol=0.15, delay=0) {
   if (!soundOn) return;
   const o = ctx.createOscillator(), g = ctx.createGain();
@@ -899,6 +1036,7 @@ function startGame() {
   document.getElementById('mode-screen').classList.add('hidden');
   document.getElementById('game-screen').classList.remove('hidden');
   document.getElementById('result-overlay').classList.remove('show');
+  setHeaderState(true);
 
   // pressure bar
   const pb = document.getElementById('pressure-bar-wrap');
@@ -1177,6 +1315,7 @@ function goMenu() {
   document.getElementById('game-screen').classList.add('hidden');
   document.getElementById('setup-screen').classList.add('hidden');
   document.getElementById('mode-screen').classList.remove('hidden');
+  setHeaderState(false);
 }
 
 // ── TIMER ──
@@ -1267,19 +1406,45 @@ function togglePause() {
   }
 }
 
+// ── HEADER STATE ──
+function setHeaderState(inGame) {
+  document.getElementById('header').classList.toggle('on-menu', !inGame);
+}
+
+// ── ABANDON MODAL ──
+function openAbandon() {
+  if (paused) togglePause(); // resume visually so it looks right behind modal
+  document.getElementById('abandon-modal').classList.add('show');
+}
+function closeAbandon() {
+  document.getElementById('abandon-modal').classList.remove('show');
+}
+function confirmAbandon() {
+  document.getElementById('abandon-modal').classList.remove('show');
+  goMenu();
+}
+
+// ── HOW TO PLAY ──
+function openHow() { document.getElementById('how-modal').classList.add('show'); }
+function closeHow() { document.getElementById('how-modal').classList.remove('show'); }
+document.getElementById('how-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('how-modal')) closeHow();
+});
+
 // ── MENU BTN ──
 document.getElementById('menu-btn').onclick = () => {
-  if (!gameOver && gameStarted) {
-    if (!confirm('Abandon current dive?')) return;
-  }
+  if (!gameOver && gameStarted) { openAbandon(); return; }
   goMenu();
 };
 
-// ── DESKTOP HINT ──
+// ── DESKTOP HINT — fade on first interaction ──
 setTimeout(() => {
   const h = document.getElementById('desktop-hint');
   h.style.opacity = '1';
-  setTimeout(() => { h.style.opacity = '0'; }, 6000);
+  const fadeHint = () => { h.classList.add('hidden-hint'); };
+  document.addEventListener('click', fadeHint, { once: true });
+  document.addEventListener('touchstart', fadeHint, { once: true });
+  setTimeout(() => h.classList.add('hidden-hint'), 8000);
 }, 1500);
 
 // ── INIT ──
