@@ -744,7 +744,7 @@
         }
 
         /* ── UPDATE BANNER ── */
-        #update-banner { max-width: 1200px; margin: 16px auto 0; padding: 0 52px; position: relative; z-index: 2; }
+        #update-banner { max-width: 1200px; margin: 16px auto 0; padding: 0 52px; position: relative; z-index: 2; display: flex; flex-direction: column; gap: 6px; }
         .update-banner-inner {
             display: flex; align-items: center; gap: 14px; padding: 12px 20px;
             border-radius: 6px; border: 1px solid rgba(212,169,71,0.3);
@@ -756,6 +756,7 @@
             background: rgba(212,169,71,0.1); border-color: rgba(212,169,71,0.45);
             box-shadow: 0 0 16px rgba(212,169,71,0.12), inset 0 1px 0 rgba(212,169,71,0.1);
         }
+        .update-banner-inner.dismissed { display: none; }
         .ub-dot {
             width: 6px; height: 6px; border-radius: 50%; background: #d4a947; flex-shrink: 0;
             box-shadow: 0 0 6px rgba(212,169,71,0.8);
@@ -785,7 +786,6 @@
             transition: all 0.2s; flex-shrink: 0; font-family: 'Outfit', sans-serif;
         }
         .ub-dismiss:hover { border-color: rgba(212,169,71,0.6); color: #d4a947; }
-        #update-banner.dismissed { display: none; }
 
         /* ── CHANGELOG MODAL ── */
         #changelog-modal {
@@ -954,26 +954,39 @@
         <div class="mq-track">
             <span class="mq-item">The Grid</span><span class="mq-item">Realm Chess</span>
             <span class="mq-item">Cosmic Blackjack</span><span class="mq-item">DEEP</span>
-            <span class="mq-item">FORGE</span><span class="mq-item">Built by BTSAI</span>
+            <span class="mq-item">FORGE</span><span class="mq-item">MAYHEM</span><span class="mq-item">Built by BTSAI</span>
             <span class="mq-item">Play Now</span><span class="mq-item">Browser Games</span>
             <span class="mq-item">The Grid</span><span class="mq-item">Realm Chess</span>
             <span class="mq-item">Cosmic Blackjack</span><span class="mq-item">DEEP</span>
-            <span class="mq-item">FORGE</span><span class="mq-item">Built by BTSAI</span>
+            <span class="mq-item">FORGE</span><span class="mq-item">MAYHEM</span><span class="mq-item">Built by BTSAI</span>
             <span class="mq-item">Play Now</span><span class="mq-item">Browser Games</span>
         </div>
     </div>
 
     <div id="update-banner">
-        <div class="update-banner-inner" id="update-banner-inner">
+        <!-- Banner 1: MAYHEM launch (newest) -->
+        <div class="update-banner-inner" id="ub-inner-mayhem">
             <div class="ub-dot"></div>
             <span class="ub-tag">Mar 2026</span>
             <div class="ub-sep" style="width:1px;height:14px;background:rgba(212,169,71,0.2);flex-shrink:0;"></div>
-            <span class="ub-headline">3 updates — FORGE &amp; DEEP launched, VOID21 major update</span>
-            <button class="ub-cta" id="ub-cta-btn">
+            <span class="ub-headline">MAYHEM launched — chaotic card game, 3 modes &amp; AI</span>
+            <button class="ub-cta" id="ub-cta-mayhem">
                 View changelog
-                <svg viewBox="0 0 24 24" style="width:10px;height:10px;stroke:#d4a947;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+                <svg viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
             </button>
-            <button class="ub-dismiss" id="ub-dismiss">✕</button>
+            <button class="ub-dismiss" id="ub-dismiss-mayhem">✕</button>
+        </div>
+        <!-- Banner 2: FORGE + DEEP + VOID21 batch -->
+        <div class="update-banner-inner" id="ub-inner-batch">
+            <div class="ub-dot"></div>
+            <span class="ub-tag">Mar 2026</span>
+            <div class="ub-sep" style="width:1px;height:14px;background:rgba(212,169,71,0.2);flex-shrink:0;"></div>
+            <span class="ub-headline">FORGE &amp; DEEP launched + VOID21 major update</span>
+            <button class="ub-cta" id="ub-cta-batch">
+                View changelog
+                <svg viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+            </button>
+            <button class="ub-dismiss" id="ub-dismiss-batch">✕</button>
         </div>
     </div>
 
@@ -1051,8 +1064,26 @@
                 <div class="cta-arr"><svg viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div>
             </div>
         </a>
-        <div class="card locked">
+        <a href="Mayhem/" class="card">
+            <canvas class="card-border-glow" id="borderCanvas5"></canvas>
+            <div class="card-pulse"></div>
+            <div class="card-spotlight"></div>
+            <div class="card-shimmer"></div>
+            <canvas class="card-particles"></canvas>
             <div class="card-num">05</div>
+            <div class="card-status"><div class="dot"></div>Live</div>
+            <div class="card-badge new-badge"><div class="card-badge-dot"></div>New</div>
+            <div class="card-icon">💣</div>
+            <h2 class="card-name">MAYHEM</h2>
+            <p class="card-genre">Card · Party</p>
+            <p class="card-preview">Draw cards. Avoid the bomb. Wreck everyone else. A chaotic party card game with 3 modes — Classic, Arsenal, and Surge.</p>
+            <div class="card-cta">
+                <span class="cta-text">Play Now</span>
+                <div class="cta-arr"><svg viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></div>
+            </div>
+        </a>
+        <div class="card locked">
+            <div class="card-num">06</div>
             <div class="card-status"><div class="dot off"></div>In Development</div>
             <div class="card-icon"><svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="28" height="28" rx="5" stroke="#444" stroke-width="1.5"/><circle cx="9" cy="9" r="2" fill="#444"/><circle cx="21" cy="9" r="2" fill="#444"/><circle cx="15" cy="15" r="2" fill="#444"/><circle cx="9" cy="21" r="2" fill="#444"/><circle cx="21" cy="21" r="2" fill="#444"/></svg></div>
             <h2 class="card-name">Classified</h2>
@@ -1064,7 +1095,7 @@
             </div>
         </div>
         <div class="card locked">
-            <div class="card-num">06</div>
+            <div class="card-num">07</div>
             <div class="card-status"><div class="dot off"></div>In Development</div>
             <div class="card-icon"><svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg"><polyline points="18,2 10,16 16,16 12,28 22,12 15,12" stroke="#444" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
             <h2 class="card-name">Classified</h2>
@@ -1085,6 +1116,7 @@
             <button class="lb-tab" data-g="Cosmic Blackjack">Cosmic Blackjack</button>
             <button class="lb-tab" data-g="DEEP">DEEP</button>
             <button class="lb-tab" data-g="FORGE">FORGE</button>
+            <button class="lb-tab" data-g="MAYHEM">MAYHEM</button>
         </div>
         <div class="lb-box" id="lbBox">
             <div class="lb-load">Loading scores...</div>
@@ -1233,6 +1265,52 @@
             </div>
 
             <div class="cl-entry cl-new">
+                <div class="cl-entry-num">05</div>
+                <div class="cl-entry-top">
+                    <span class="cl-version">v1.0</span>
+                    <span class="cl-game-tag">MAYHEM</span>
+                    <span class="cl-new-badge">NEW</span>
+                    <span class="cl-date">Mar 2026</span>
+                </div>
+                <div class="cl-entry-title">MAYHEM Goes Live</div>
+                <div class="cl-entry-summary">A chaotic cartoon card game for 2–6 players. Draw cards, play actions, avoid the bomb — last player standing wins. Three modes, 12 card types, AI opponents, and pass-and-play multiplayer with a full animated flow.</div>
+                <button class="cl-expand-btn" id="expand-mayhem">Full changelog <span class="cl-chev">▾</span></button>
+                <div class="cl-bullets" id="bullets-mayhem">
+                    <ul>
+                        <li class="cl-cat">Modes</li>
+                        <li><b>Classic</b><span>Core loop — draw cards, play actions, avoid the 💣 BOOM. Last player alive wins</span></li>
+                        <li><b>Arsenal</b><span>Classic + hand limit of 7. Play 2 matching cards for a double combo effect — BLAST forces 4 draws, SNATCH steals 2, and so on</span></li>
+                        <li><b>Surge</b><span>Draft phase before every round — 3 cards revealed from a shared pool, each player picks 1 to add to their deck. Your hand grows stronger over time</span></li>
+                        <li class="cl-cat">Cards (12 types)</li>
+                        <li><b>💣 BOOM</b><span>Eliminated — unless you hold a DEFUSE card</span></li>
+                        <li><b>🛡️ DEFUSE</b><span>Cancels a BOOM; you then choose where to reinsert it in the deck (Top, Mid, Bottom, or Random)</span></li>
+                        <li><b>👁️ PEEK / 🔀 SHUFFLE</b><span>Look at the top 3 deck cards, or randomize the entire deck</span></li>
+                        <li><b>⏭️ SKIP / 🔁 REVERSE</b><span>End your turn without drawing, or flip the turn order direction</span></li>
+                        <li><b>💥 BLAST / 🤲 SNATCH</b><span>Force a target to draw 2 cards, or steal a random card from their hand</span></li>
+                        <li><b>🔒 LOCK / 🃏 WILD</b><span>Block a target from playing cards next turn, or copy the last card played</span></li>
+                        <li><b>🌪️ CHAOS</b><span>Everyone passes their entire hand one seat to the left — instant mayhem</span></li>
+                        <li><b>✨ SURGE</b><span>Surge mode only — grants extra draft picks next round</span></li>
+                        <li class="cl-cat">Multiplayer &amp; AI</li>
+                        <li><b>2–6 players</b><span>Pass-and-play with a screen-hiding pass screen between every turn — hands stay secret</span></li>
+                        <li><b>AI opponents</b><span>Toggle on/off with a sliding switch; choose 1 to 5 AI players (max = total players minus 1); Easy or Medium difficulty. AI count buttons update dynamically based on player count</span></li>
+                        <li><b>Avatars &amp; names</b><span>Each player picks an emoji avatar (tap to cycle) and enters a name before the game starts</span></li>
+                        <li class="cl-cat">Gameplay Flow</li>
+                        <li><b>Draw reveal</b><span>After drawing a card, the card flips in with an animation and you see what you got before pressing "Next Player →"</span></li>
+                        <li><b>BOOM flow</b><span>Drawing a bomb triggers a full-screen BOOM reveal with screen shake and sound, then shows whether you have a DEFUSE or are eliminated — no instant popups</span></li>
+                        <li><b>Defuse screen</b><span>After using a DEFUSE card, a dedicated screen lets you choose exactly where to reinsert the bomb</span></li>
+                        <li><b>Sort hand</b><span>⇅ SORT button in the action bar sorts your hand by card type priority — DEFUSE first, BOOM last</span></li>
+                        <li class="cl-cat">UI &amp; Polish</li>
+                        <li><b>Cartoon theme</b><span>Bangers + Nunito fonts, saturated palette, animated purple/red/cyan background blobs</span></li>
+                        <li><b>Card back design</b><span>Draw pile shows a real card back — diamond trellis pattern, gradient, double border inset, MAYHEM wordmark</span></li>
+                        <li><b>Discard slot</b><span>Dashed placeholder when empty; shows the last played card's face when active</span></li>
+                        <li><b>Victory confetti</b><span>Canvas confetti burst on game end with full session stats — mode, rounds, cards played, bombs defused</span></li>
+                        <li><b>Leaderboard</b><span>Winner's round count submitted to THE GRID global leaderboard via Supabase</span></li>
+                        <li><b>All universal standards</b><span>⌂ portal icon, ← LOBBY button, ← THE GRID link, ? help modal, abandon confirm, desktop hint, audio context fix, mobile responsive</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="cl-entry cl-new">
                 <div class="cl-entry-num">04</div>
                 <div class="cl-entry-top">
                     <span class="cl-version">v1.0</span>
@@ -1352,23 +1430,60 @@
 <script>
 // ── CHANGELOG ──
 const clModal = document.getElementById('changelog-modal');
-function openChangelog() { clModal.classList.add('open'); }
+
+function openChangelog(scrollToId) {
+    clModal.classList.add('open');
+    const card = clModal.querySelector('.cl-card');
+    if (scrollToId) {
+        setTimeout(() => {
+            const target = document.getElementById(scrollToId)?.closest('.cl-entry');
+            if (target && card) {
+                // offsetTop relative to the scrollable .cl-card container
+                const headerHeight = card.querySelector('.cl-header')?.offsetHeight || 0;
+                card.scrollTop = target.offsetTop - headerHeight;
+            }
+        }, 80);
+    } else {
+        // No target — scroll to top
+        setTimeout(() => { if (card) card.scrollTop = 0; }, 80);
+    }
+}
 function closeChangelog() {
     clModal.classList.remove('open');
-    // reset all expanded bullets back to collapsed
     document.querySelectorAll('.cl-bullets').forEach(b => b.classList.remove('open'));
     document.querySelectorAll('.cl-expand-btn').forEach(b => b.classList.remove('open'));
 }
-document.getElementById('updatePill').addEventListener('click', openChangelog);
-document.getElementById('ub-cta-btn').addEventListener('click', openChangelog);
-document.getElementById('update-banner-inner').addEventListener('click', e => {
-    if (!e.target.closest('#ub-dismiss') && !e.target.closest('#ub-cta-btn')) openChangelog();
+
+// Nav pill — opens to top
+document.getElementById('updatePill').addEventListener('click', () => openChangelog());
+
+// Banner 1: MAYHEM — open and scroll to MAYHEM entry
+document.getElementById('ub-cta-mayhem').addEventListener('click', e => { e.stopPropagation(); openChangelog('expand-mayhem'); });
+document.getElementById('ub-inner-mayhem').addEventListener('click', e => {
+    if (!e.target.closest('#ub-dismiss-mayhem') && !e.target.closest('#ub-cta-mayhem')) openChangelog('expand-mayhem');
 });
+document.getElementById('ub-dismiss-mayhem').addEventListener('click', e => {
+    e.stopPropagation();
+    document.getElementById('ub-inner-mayhem').classList.add('dismissed');
+});
+
+// Banner 2: batch — open and scroll to FORGE entry
+document.getElementById('ub-cta-batch').addEventListener('click', e => { e.stopPropagation(); openChangelog('expand-forge'); });
+document.getElementById('ub-inner-batch').addEventListener('click', e => {
+    if (!e.target.closest('#ub-dismiss-batch') && !e.target.closest('#ub-cta-batch')) openChangelog('expand-forge');
+});
+document.getElementById('ub-dismiss-batch').addEventListener('click', e => {
+    e.stopPropagation();
+    document.getElementById('ub-inner-batch').classList.add('dismissed');
+});
+
 document.getElementById('cl-close').addEventListener('click', closeChangelog);
 clModal.addEventListener('click', e => { if (e.target === clModal) closeChangelog(); });
-document.getElementById('ub-dismiss').addEventListener('click', e => {
-    e.stopPropagation();
-    document.getElementById('update-banner').classList.add('dismissed');
+document.getElementById('expand-mayhem').addEventListener('click', function() {
+    const b = document.getElementById('bullets-mayhem');
+    const open = b.classList.toggle('open');
+    this.classList.toggle('open', open);
+    if (open) { this.closest('.cl-entry')?.classList.remove('cl-new'); this.closest('.cl-entry')?.querySelector('.cl-new-badge')?.remove(); }
 });
 document.getElementById('expand-forge').addEventListener('click', function() {
     const b = document.getElementById('bullets-forge');
@@ -1664,7 +1779,7 @@ document.getElementById('themeTog').addEventListener('click', () => {
 // ── TYPING ──
 const titleEl = document.getElementById('heroTitle');
 // sequence: THE GRID → CHESS → BLACKJACK → loop back to THE GRID forever
-const words = ['THE GRID', 'CHESS', 'BLACKJACK', 'DEEP', 'FORGE'];
+const words = ['THE GRID', 'CHESS', 'BLACKJACK', 'DEEP', 'FORGE', 'MAYHEM'];
 let wi = 0, ci = 0, del = false, firstCycle = true;
 
 function type() {
@@ -1736,7 +1851,7 @@ async function incrementSessions() {
 }
 
 setTimeout(async () => {
-    animCount(document.getElementById('cGames'), 4, 1200, 2);
+    animCount(document.getElementById('cGames'), 5, 1200, 2);
     const alreadyCounted = localStorage.getItem('thegrid_visited');
     let globalSessions;
     if (!alreadyCounted) {
