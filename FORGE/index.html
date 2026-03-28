@@ -298,7 +298,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;bac
 </header>
 
 <!-- SCREEN 1: MODE SELECT — click goes straight to settings, no Continue -->
-<div class="screen" id="screen-mode">
+<div class="screen" id="screen-mode" style="padding-top:var(--header-h);overflow-y:auto;">
   <div class="screen-inner" style="max-width:480px;">
     <div class="forge-logo">For<em>g</em>e</div>
     <div class="forge-tagline">Alchemy Merge · Transmute the Elements</div>
@@ -328,14 +328,14 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;bac
         <div class="opt-card-arrow">→</div>
       </div>
     </div>
-    <button onclick="openHow()" title="How to play" class="help-inline-btn">?</button>
+    <button onclick="openHow()" title="How to play" class="help-inline-btn">? How to Play</button>
     <a href="../index.html" class="portal-link">← The Grid</a>
   </div>
 </div>
 
 <!-- SCREEN 2: SETTINGS (grid + tiles + win condition) -->
-<div class="screen hidden" id="screen-settings">
-  <div class="screen-inner" style="max-width:480px;padding-top:20px;overflow-y:auto;max-height:100dvh;justify-content:flex-start;">
+<div class="screen hidden" id="screen-settings" style="align-items:center;overflow-y:auto;padding-top:calc(var(--header-h) + 12px);padding-bottom:32px;">
+  <div class="screen-inner" style="max-width:480px;padding-top:0;padding-bottom:0;justify-content:flex-start;width:100%;">
     <div class="step-back" onclick="goModeSelect()">← Back</div>
     <div class="settings-mode-badge" id="settings-mode-badge">⚗ Classic</div>
     <div class="settings-sub" id="settings-mode-sub">Merge to The Forge, no time limit</div>
@@ -975,11 +975,14 @@ function pingActive(val){fetch(`${SUPABASE_URL}/rest/v1/meta?key=eq.active_game`
 // ── DESKTOP HINT ──
 setTimeout(()=>{
   const h=document.getElementById('desktop-hint');
-  h.classList.add('hint-visible');
-  const fade=()=>h.classList.add('hidden-hint');
-  document.addEventListener('click',fade,{once:true});
-  document.addEventListener('touchstart',fade,{once:true,passive:true});
-  setTimeout(()=>h.classList.add('hidden-hint'),8000);
+  // Only show on touch/mobile devices
+  if(window.matchMedia('(hover:none) and (pointer:coarse)').matches){
+    h.classList.add('hint-visible');
+    const fade=()=>h.classList.add('hidden-hint');
+    document.addEventListener('click',fade,{once:true});
+    document.addEventListener('touchstart',fade,{once:true,passive:true});
+    setTimeout(()=>h.classList.add('hidden-hint'),8000);
+  }
 },1500);
 </script>
 </body>
