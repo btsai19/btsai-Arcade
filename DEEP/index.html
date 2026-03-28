@@ -1087,6 +1087,15 @@ function placeMines(safeR, safeC) {
 function renderGrid() {
   const { rows, cols } = cfg;
   const g = document.getElementById('grid');
+  // Calculate cell size to fill available width on mobile
+  const isMobile = window.matchMedia('(hover:none) and (pointer:coarse)').matches;
+  if (isMobile) {
+    const padding = 48; // total horizontal padding
+    const gap = (cols - 1) * 3; // 3px gap between cells
+    const cellPx = Math.floor((window.innerWidth - padding - gap) / cols);
+    const size = Math.min(Math.max(cellPx, 28), 52) + 'px';
+    document.documentElement.style.setProperty('--cell-size', size);
+  }
   g.style.gridTemplateColumns = `repeat(${cols}, var(--cell-size))`;
   g.innerHTML = '';
   for (let r=0; r<rows; r++) for (let c=0; c<cols; c++) {
