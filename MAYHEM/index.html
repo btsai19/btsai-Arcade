@@ -1,0 +1,3194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MAYHEM — The Grid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg:       #1a1a2e;
+    --bg2:      #16213e;
+    --bg3:      #0f3460;
+    --surface:  #1e1e3a;
+    --card-bg:  #fefefe;
+    --border:   rgba(255,255,255,0.10);
+    --border-h: rgba(255,255,255,0.22);
+    --text:     #f0f0ff;
+    --dim:      rgba(240,240,255,0.45);
+    --red:      #ff3c3c;
+    --yellow:   #ffe53b;
+    --purple:   #9b5de5;
+    --cyan:     #00f5d4;
+    --orange:   #ff7c43;
+    --pink:     #f72585;
+    --green:    #06d6a0;
+    --panel:    rgba(30,30,58,0.95);
+    --glow-r:   0 0 20px rgba(255,60,60,0.5);
+    --glow-y:   0 0 20px rgba(255,229,59,0.5);
+    --glow-p:   0 0 20px rgba(155,93,229,0.5);
+    --glow-c:   0 0 20px rgba(0,245,212,0.5);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 600;
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none;
+    user-select: none;
+}
+/* Grain texture */
+body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+    opacity: 0.4;
+}
+
+/* BG animated blobs */
+.bg-blobs {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+}
+.blob {
+    position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.28;
+    animation: blobFloat 10s ease-in-out infinite;
+}
+.blob1 { width: 600px; height: 600px; background: radial-gradient(circle, var(--purple), #3a0ca3); top: -150px; left: -150px; animation-delay: 0s; }
+.blob2 { width: 500px; height: 500px; background: radial-gradient(circle, var(--red), #9d0208); bottom: -150px; right: -150px; animation-delay: -3.5s; }
+.blob3 { width: 400px; height: 400px; background: radial-gradient(circle, var(--cyan), #023e8a); top: 40%; left: 45%; animation-delay: -7s; }
+.blob4 { width: 280px; height: 280px; background: radial-gradient(circle, var(--yellow), var(--orange)); top: 20%; right: 10%; animation-delay: -5s; opacity: 0.15; }
+@keyframes blobFloat {
+    0%,100% { transform: translate(0,0) scale(1); }
+    33%      { transform: translate(30px,-20px) scale(1.05); }
+    66%      { transform: translate(-20px,30px) scale(0.95); }
+}
+
+/* ── SCREENS ── */
+.screen {
+    position: fixed; inset: 0; z-index: 10;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 20px;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.screen.hidden { opacity: 0; pointer-events: none; transform: scale(0.97); }
+
+/* ── HEADER ── */
+#game-header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px;
+    background: rgba(26,26,46,0.92); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    transition: opacity 0.3s;
+}
+#game-header.on-menu { opacity: 0; pointer-events: none; }
+.hdr-left { display: flex; align-items: center; gap: 10px; }
+.hdr-portal {
+    display: flex; align-items: center; gap: 6px;
+    text-decoration: none; color: var(--dim);
+    font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase;
+    opacity: 0.65; transition: opacity 0.2s;
+    padding: 6px 10px; border-radius: 6px; border: 1px solid transparent;
+}
+.hdr-portal:hover { opacity: 1; border-color: var(--border); }
+.hdr-portal-icon { font-size: 14px; }
+.hdr-back {
+    display: flex; align-items: center; gap: 5px;
+    background: none; border: 1px solid var(--border); border-radius: 6px;
+    color: var(--dim); font-family: 'Nunito', sans-serif; font-size: 0.65rem;
+    letter-spacing: 0.1em; text-transform: uppercase; padding: 6px 12px;
+    cursor: pointer; transition: all 0.2s;
+}
+.hdr-back:hover { color: var(--text); border-color: var(--border-h); }
+.hdr-title {
+    font-family: 'Bangers', cursive; font-size: 1.6rem;
+    letter-spacing: 0.12em; color: var(--yellow);
+    text-shadow: 2px 2px 0 var(--red), 0 0 20px rgba(255,229,59,0.4);
+    position: absolute; left: 50%; transform: translateX(-50%);
+}
+.turn-name {
+    font-family: 'Bangers', cursive; font-size: 1.3rem; letter-spacing: 0.06em;
+    color: var(--yellow); text-shadow: 0 0 12px rgba(255,229,59,0.5);
+}
+.hdr-right { display: flex; align-items: center; gap: 8px; }
+.hdr-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--dim); cursor: pointer; font-size: 14px;
+    transition: all 0.2s; font-family: 'Nunito', sans-serif;
+}
+.hdr-btn:hover { border-color: var(--border-h); color: var(--text); }
+.hdr-mode-pill {
+    font-size: 0.52rem; letter-spacing: 0.15em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 10px; border: 1px solid;
+}
+.hdr-mode-pill.classic { color: var(--yellow); border-color: rgba(255,229,59,0.4); background: rgba(255,229,59,0.08); }
+.hdr-mode-pill.arsenal { color: var(--purple); border-color: rgba(155,93,229,0.4); background: rgba(155,93,229,0.08); }
+.hdr-mode-pill.surge   { color: var(--cyan); border-color: rgba(0,245,212,0.4); background: rgba(0,245,212,0.08); }
+
+/* ── MODE SELECT ── */
+#screen-mode {
+    background: var(--bg);
+    padding-top: 80px;
+}
+.mode-logo {
+    font-family: 'Bangers', cursive;
+    font-size: clamp(4.5rem, 18vw, 9rem);
+    letter-spacing: 0.06em;
+    color: var(--yellow);
+    text-shadow: 3px 3px 0 var(--red), 6px 6px 0 rgba(155,93,229,0.6), 10px 10px 0 rgba(0,0,0,0.35);
+    line-height: 1; margin-bottom: 2px;
+    animation: logoBounce 0.6s cubic-bezier(0.36,0.07,0.19,0.97) both, logoIdlePulse 3s ease-in-out 0.8s infinite;
+}
+@keyframes logoIdlePulse {
+    0%,100% { text-shadow: 3px 3px 0 var(--red), 6px 6px 0 rgba(155,93,229,0.6), 10px 10px 0 rgba(0,0,0,0.35); }
+    50% { text-shadow: 3px 3px 0 var(--red), 6px 6px 0 rgba(155,93,229,0.8), 10px 10px 0 rgba(0,0,0,0.35), 0 0 40px rgba(255,229,59,0.3); }
+}
+@keyframes logoBounce {
+    0%   { transform: scale(0.5) rotate(-5deg); opacity: 0; }
+    60%  { transform: scale(1.08) rotate(1deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+.mode-tagline {
+    font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--dim); margin-bottom: 36px;
+}
+.mode-cards {
+    display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+    max-width: 780px; width: 100%;
+}
+.mode-card {
+    flex: 1; min-width: 200px; max-width: 240px;
+    background: var(--surface); border: 2px solid var(--border);
+    border-radius: 16px; padding: 24px 20px; cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.22,1,0.36,1);
+    text-align: center; position: relative; overflow: hidden;
+}
+.mode-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 50% 0%, var(--mc,transparent) 0%, transparent 70%);
+    opacity: 0.1; transition: opacity 0.3s;
+}
+.mode-card:hover { transform: translateY(-6px) scale(1.02); border-color: var(--mc,var(--border-h)); }
+.mode-card:hover::before { opacity: 0.2; }
+.mode-card.classic { --mc: var(--yellow); }
+.mode-card.arsenal { --mc: var(--purple); }
+.mode-card.surge   { --mc: var(--cyan); }
+.mode-card:hover.classic { box-shadow: 0 12px 40px rgba(255,229,59,0.25); }
+.mode-card:hover.arsenal { box-shadow: 0 12px 40px rgba(155,93,229,0.25); }
+.mode-card:hover.surge   { box-shadow: 0 12px 40px rgba(0,245,212,0.25); }
+.mc-icon { font-size: 2.5rem; margin-bottom: 10px; display: block; }
+.mc-name {
+    font-family: 'Bangers', cursive; font-size: 1.6rem; letter-spacing: 0.08em;
+    margin-bottom: 6px;
+}
+.mode-card.classic .mc-name { color: var(--yellow); }
+.mode-card.arsenal .mc-name { color: var(--purple); }
+.mode-card.surge   .mc-name { color: var(--cyan); }
+.mc-desc { font-size: 0.7rem; color: var(--dim); line-height: 1.55; }
+.mc-tag {
+    display: inline-block; margin-top: 10px;
+    font-size: 0.5rem; letter-spacing: 0.18em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 8px; border: 1px solid currentColor; opacity: 0.6;
+}
+.mode-card.classic .mc-tag { color: var(--yellow); }
+.mode-card.arsenal .mc-tag { color: var(--purple); }
+.mode-card.surge   .mc-tag { color: var(--cyan); }
+
+.mode-portal-link {
+    margin-top: 28px;
+    font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--dim); text-decoration: none; opacity: 0.5;
+    transition: opacity 0.2s;
+}
+.mode-portal-link:hover { opacity: 0.85; }
+
+/* ── HELP BUTTON on mode screen ── */
+.mode-help-btn {
+    margin-top: 16px;
+    display: flex; align-items: center; gap: 6px;
+    background: none; border: 1px solid var(--border); border-radius: 20px;
+    color: var(--dim); cursor: pointer; padding: 6px 14px;
+    font-family: 'Nunito', sans-serif; font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
+    transition: all 0.2s;
+}
+.mode-help-btn:hover { border-color: var(--border-h); color: var(--text); }
+
+/* ── PLAYER SETUP ── */
+#screen-setup { background: var(--bg); overflow-y: auto; padding-top: 20px; padding-bottom: 20px; }
+.setup-inner {
+    width: 100%; max-width: 640px;
+    display: flex; flex-direction: column; gap: 20px;
+}
+.setup-title {
+    font-family: 'Bangers', cursive; font-size: 2.4rem; letter-spacing: 0.08em;
+    text-align: center;
+}
+.setup-title span { color: var(--yellow); }
+.setup-section {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px;
+}
+.setup-section-label {
+    font-size: 0.58rem; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--dim); margin-bottom: 14px;
+}
+.player-count-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.pc-btn {
+    flex: 1; min-width: 38px; padding: 8px 4px;
+    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    color: var(--dim); cursor: pointer; font-family: 'Bangers', cursive;
+    font-size: 1.2rem; letter-spacing: 0.06em; transition: all 0.2s; text-align: center;
+}
+.pc-btn.active { border-color: var(--yellow); color: var(--yellow); background: rgba(255,229,59,0.1); box-shadow: 0 0 14px rgba(255,229,59,0.3); }
+.ai-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.ai-label { font-size: 0.78rem; color: var(--text); }
+.ai-sub { font-size: 0.62rem; color: var(--dim); margin-top: 2px; }
+
+/* AI toggle switch */
+.ai-toggle-wrap { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.ai-tog-label { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); transition: opacity 0.25s; }
+.ai-toggle-switch {
+    width: 48px; height: 26px; border-radius: 13px;
+    background: var(--bg); border: 1.5px solid var(--border-h);
+    cursor: pointer; position: relative; transition: all 0.3s;
+    flex-shrink: 0; padding: 0;
+}
+.ai-toggle-switch.on {
+    background: rgba(155,93,229,0.2);
+    border-color: var(--purple);
+    box-shadow: 0 0 14px rgba(155,93,229,0.4);
+}
+.ai-toggle-knob {
+    position: absolute; top: 3px; left: 3px;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--dim); transition: all 0.3s cubic-bezier(0.22,1,0.36,1);
+}
+.ai-toggle-switch.on .ai-toggle-knob {
+    transform: translateX(22px);
+    background: var(--purple);
+    box-shadow: 0 0 8px rgba(155,93,229,0.8);
+}
+
+/* AI count buttons */
+.ai-count-row { display: flex; gap: 8px; }
+.ai-count-btn {
+    width: 48px; height: 42px; border-radius: 8px;
+    background: var(--bg); border: 1.5px solid var(--border);
+    color: var(--dim); cursor: pointer; font-family: 'Bangers', cursive;
+    font-size: 1.4rem; letter-spacing: 0.04em; transition: all 0.2s;
+}
+.ai-count-btn:hover { border-color: var(--border-h); color: var(--text); }
+.ai-count-btn.active {
+    border-color: var(--purple); color: var(--purple);
+    background: rgba(155,93,229,0.12);
+    box-shadow: 0 0 14px rgba(155,93,229,0.35);
+}
+
+.diff-opt {
+    padding: 7px 18px; border-radius: 8px;
+    background: var(--bg); border: 1.5px solid var(--border);
+    color: var(--dim); cursor: pointer; font-family: 'Nunito', sans-serif;
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; transition: all 0.2s;
+}
+.diff-opt:hover { border-color: var(--border-h); color: var(--text); }
+.diff-opt.active {
+    border-color: var(--yellow); color: var(--yellow);
+    background: rgba(255,229,59,0.1);
+    box-shadow: 0 0 12px rgba(255,229,59,0.3);
+}
+.player-list { display: flex; flex-direction: column; gap: 8px; }
+.player-row {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px;
+}
+.player-avatar { font-size: 1.4rem; cursor: pointer; transition: transform 0.2s; }
+.player-avatar:hover { transform: scale(1.3); }
+.player-name-input {
+    flex: 1; background: none; border: none; outline: none;
+    color: var(--text); font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 700;
+}
+.player-name-input::placeholder { color: var(--dim); }
+.player-ai-badge {
+    font-size: 0.48rem; letter-spacing: 0.14em; text-transform: uppercase;
+    padding: 2px 6px; border-radius: 4px;
+    border: 1px solid rgba(155,93,229,0.4); color: var(--purple); background: rgba(155,93,229,0.1);
+}
+.start-btn {
+    padding: 14px 32px; border-radius: 12px; border: none; cursor: pointer;
+    font-family: 'Bangers', cursive; font-size: 1.6rem; letter-spacing: 0.12em;
+    background: var(--yellow); color: #1a1a2e;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.4), var(--glow-y);
+    transition: all 0.15s; align-self: center; width: 100%;
+}
+.start-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 rgba(0,0,0,0.4), 0 0 30px rgba(255,229,59,0.6); }
+.start-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.4); }
+.setup-back {
+    background: none; border: 1px solid var(--border); border-radius: 8px;
+    color: var(--dim); cursor: pointer; font-family: 'Nunito', sans-serif;
+    font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 8px 16px; transition: all 0.2s; align-self: center;
+}
+.setup-back:hover { border-color: var(--border-h); color: var(--text); }
+
+/* SURGE draft setup */
+.surge-info {
+    background: rgba(0,245,212,0.06); border: 1px solid rgba(0,245,212,0.25);
+    border-radius: 8px; padding: 12px 14px;
+    font-size: 0.72rem; color: var(--dim); line-height: 1.6;
+}
+.surge-info b { color: var(--cyan); }
+
+/* ── PASS SCREEN ── */
+#screen-pass {
+    background: #0a0a1a;
+    text-align: center; gap: 20px;
+}
+.pass-icon { font-size: 4rem; animation: passWiggle 1s ease-in-out infinite; }
+@keyframes passWiggle {
+    0%,100% { transform: rotate(-8deg); }
+    50% { transform: rotate(8deg); }
+}
+.pass-title {
+    font-family: 'Bangers', cursive; font-size: clamp(2rem, 8vw, 3.5rem);
+    letter-spacing: 0.08em; color: var(--yellow);
+    text-shadow: 3px 3px 0 var(--red);
+}
+.pass-subtitle { font-size: 0.8rem; color: var(--dim); letter-spacing: 0.06em; }
+.pass-player { font-family: 'Bangers', cursive; font-size: 2rem; letter-spacing: 0.06em; color: var(--cyan); margin: 4px 0; }
+.pass-btn {
+    padding: 14px 40px; border-radius: 12px; border: none; cursor: pointer;
+    font-family: 'Bangers', cursive; font-size: 1.5rem; letter-spacing: 0.1em;
+    background: var(--yellow); color: #1a1a2e;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.5), var(--glow-y);
+    transition: all 0.15s; margin-top: 10px;
+}
+.pass-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 rgba(0,0,0,0.5), 0 0 30px rgba(255,229,59,0.6); }
+.pass-btn:active { transform: translateY(2px); }
+
+/* ── SURGE DRAFT SCREEN ── */
+#screen-draft { background: var(--bg); gap: 16px; }
+.draft-title {
+    font-family: 'Bangers', cursive; font-size: 2.5rem; letter-spacing: 0.08em;
+    color: var(--cyan); text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    text-align: center;
+}
+.draft-sub { font-size: 0.7rem; color: var(--dim); text-align: center; }
+.draft-pool { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.draft-card-slot {
+    width: 130px; cursor: pointer;
+    transition: transform 0.2s;
+}
+.draft-card-slot:hover { transform: translateY(-8px) scale(1.04); }
+.draft-skip {
+    background: none; border: 1px solid var(--border); border-radius: 8px;
+    color: var(--dim); cursor: pointer; font-family: 'Nunito', sans-serif;
+    font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 8px 18px; transition: all 0.2s;
+}
+.draft-skip:hover { border-color: var(--border-h); color: var(--text); }
+.draft-player-info { font-size: 0.78rem; color: var(--text); }
+.draft-player-info b { color: var(--cyan); }
+
+/* ── GAME SCREEN ── */
+#screen-game {
+    background: var(--bg);
+    padding-top: 60px;
+    align-items: stretch;
+    justify-content: flex-start;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Turn indicator */
+.turn-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 14px; background: var(--surface); border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+.turn-player {
+    display: flex; align-items: center; gap: 8px;
+}
+.turn-avatar { font-size: 1.3rem; }
+.turn-label { font-size: 0.55rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--dim); }
+.turn-deck-info { display: flex; align-items: center; gap: 16px; }
+.deck-count {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim);
+}
+.deck-num { font-family: 'Bangers', cursive; font-size: 1.3rem; color: var(--text); }
+
+/* Discard area */
+.game-table {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    gap: 40px; position: relative; overflow: hidden; min-height: 0;
+    padding: 10px;
+}
+.pile-area { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.pile-label { font-size: 0.52rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--dim); }
+.draw-pile {
+    width: 90px; height: 126px; border-radius: 10px;
+    background: linear-gradient(135deg, #2a2a4a, #1a1a3a);
+    border: 2px solid var(--border-h); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bangers', cursive; font-size: 2rem; letter-spacing: 0.06em;
+    color: var(--dim); transition: all 0.2s; position: relative;
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.4);
+}
+.draw-pile::before {
+    content: ''; position: absolute; inset: 3px;
+    border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);
+}
+.draw-pile:hover { border-color: var(--yellow); color: var(--yellow); box-shadow: 3px 3px 0 rgba(0,0,0,0.4), var(--glow-y); transform: translateY(-3px); }
+.draw-pile.danger { animation: dangerPulse 0.6s ease-in-out infinite; }
+.draw-pile.danger-mid { animation: dangerPulseMid 1.2s ease-in-out infinite; }
+.draw-pile.danger-low { animation: dangerPulseLow 2.5s ease-in-out infinite; }
+@keyframes dangerPulse {
+    0%,100% { border-color: var(--red); box-shadow: 0 0 30px rgba(255,60,60,0.8), 0 0 60px rgba(255,60,60,0.3); }
+    50%      { border-color: rgba(255,60,60,0.4); box-shadow: none; }
+}
+@keyframes dangerPulseMid {
+    0%,100% { border-color: var(--orange); box-shadow: 0 0 18px rgba(255,124,67,0.6); }
+    50%      { border-color: rgba(255,124,67,0.3); box-shadow: none; }
+}
+@keyframes dangerPulseLow {
+    0%,100% { border-color: var(--yellow); box-shadow: 0 0 10px rgba(255,229,59,0.35); }
+    50%      { border-color: var(--border-h); box-shadow: none; }
+}
+.discard-pile {
+    width: 90px; height: 126px; border-radius: 10px;
+    border: 2px dashed var(--border); display: flex; align-items: center; justify-content: center;
+    position: relative;
+}
+.discard-top { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+
+/* All players peek */
+.players-row {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 6px;
+    padding: 6px 10px; border-top: 1px solid var(--border); flex-shrink: 0;
+}
+.player-token {
+    display: flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 20px;
+    border: 1px solid var(--border); background: var(--surface); font-size: 0.65rem;
+    transition: all 0.3s;
+}
+.player-token.active { border-color: var(--yellow); background: rgba(255,229,59,0.08); }
+.player-token.eliminated { opacity: 0.3; text-decoration: line-through; }
+.player-token.locked-out { border-color: rgba(155,93,229,0.5); }
+.pt-av { font-size: 0.9rem; }
+.pt-name { font-family: 'Bangers', cursive; font-size: 0.9rem; letter-spacing: 0.04em; }
+.pt-cards { color: var(--dim); }
+
+/* Hand */
+.hand-area {
+    flex-shrink: 0; overflow: hidden; position: relative;
+    height: 170px; background: rgba(0,0,0,0.25); border-top: 1px solid var(--border);
+}
+.hand-scroll {
+    display: flex; align-items: center; gap: 0; height: 100%;
+    padding: 14px 20px 10px; overflow-x: auto; overflow-y: hidden;
+    scrollbar-width: none; -ms-overflow-style: none;
+}
+.hand-scroll::-webkit-scrollbar { display: none; }
+@keyframes handShake {
+    0%,100% { transform: translateX(0); }
+    15% { transform: translateX(-6px) rotate(-1deg); }
+    30% { transform: translateX(6px) rotate(1deg); }
+    45% { transform: translateX(-5px); }
+    60% { transform: translateX(5px); }
+    75% { transform: translateX(-3px); }
+}
+.hand-area.shake { animation: handShake 0.5s ease; }
+
+/* Action buttons */
+.action-row {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 8px 10px; background: var(--surface); border-top: 1px solid var(--border);
+    flex-shrink: 0; flex-wrap: wrap;
+}
+.action-btn {
+    padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;
+    font-family: 'Bangers', cursive; font-size: 1rem; letter-spacing: 0.08em;
+    transition: all 0.15s;
+}
+.action-btn.draw {
+    background: var(--yellow); color: #1a1a2e;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 0 20px rgba(255,229,59,0.3);
+    padding: 8px 28px;
+    animation: drawPulse 2s ease-in-out infinite;
+}
+@keyframes drawPulse {
+    0%,100% { box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 0 20px rgba(255,229,59,0.3); }
+    50%      { box-shadow: 0 4px 0 rgba(0,0,0,0.5), 0 0 35px rgba(255,229,59,0.6); }
+}
+.action-btn.draw:hover { transform: translateY(-2px); box-shadow: 0 6px 0 rgba(0,0,0,0.5), 0 0 40px rgba(255,229,59,0.7) !important; animation: none; }
+.action-btn.draw:disabled { animation: none; }
+.action-btn.skip {
+    background: var(--surface); color: var(--cyan); border: 1px solid rgba(0,245,212,0.4);
+}
+.action-btn.skip:hover { background: rgba(0,245,212,0.1); }
+.action-btn.sort { 
+    background: var(--surface); color: var(--dim); border: 1px solid var(--border);
+    font-family: 'Nunito', sans-serif; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.1em;
+    position: relative;
+}
+.action-btn.sort:hover { border-color: var(--border-h); color: var(--text); }
+.action-btn.sort.sort-active {
+    color: var(--cyan);
+    border-color: rgba(0,245,212,0.4);
+    background: rgba(0,245,212,0.06);
+}
+.action-btn.sort.sort-active::after {
+    content: '';
+    position: absolute;
+    top: 5px; right: 5px;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 6px var(--cyan);
+}
+
+/* ── CARD FLIGHT ANIMATIONS ── */
+#card-flight {
+    position: fixed; z-index: 2000; pointer-events: none;
+    width: 86px; height: 120px; border-radius: 10px;
+    display: none;
+}
+@keyframes flyToHand {
+    0%   { opacity: 1; transform: scale(0.8) rotate(-10deg); }
+    60%  { opacity: 1; transform: scale(1.15) rotate(5deg); }
+    100% { opacity: 0; transform: scale(0.7) rotate(-3deg) translateY(30px); }
+}
+@keyframes flyToDiscard {
+    0%   { opacity: 1; transform: scale(1.1) rotate(-5deg); }
+    100% { opacity: 0; transform: scale(0.85) rotate(15deg) translateY(-20px); }
+}
+#card-flight.fly-to-hand { animation: flyToHand 0.4s cubic-bezier(0.22,1,0.36,1) forwards; }
+#card-flight.fly-to-discard { animation: flyToDiscard 0.3s cubic-bezier(0.22,1,0.36,1) forwards; }
+
+@keyframes cardDealIn {
+    0%   { opacity: 0; transform: scale(0.4) translateY(-40px) rotate(-15deg); }
+    70%  { opacity: 1; transform: scale(1.1) translateY(4px) rotate(3deg); }
+    100% { opacity: 1; transform: scale(1) translateY(0) rotate(0deg); }
+}
+.play-card.deal-in { animation: cardDealIn 0.35s cubic-bezier(0.22,1,0.36,1) both; }
+.play-card.dragging {
+    opacity: 0.3 !important;
+    transform: scale(0.9) translateY(-10px) !important;
+    z-index: 1 !important;
+    transition: none !important;
+    pointer-events: none;
+}
+.action-btn.draw:active, .action-btn.skip:active { transform: translateY(2px); box-shadow: none; }
+.action-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+/* ── CARD TOOLTIP ── */
+.card-tooltip {
+    position: fixed; z-index: 9000;
+    background: rgba(18,16,40,0.97);
+    border: 1px solid var(--border-h);
+    border-radius: 10px;
+    padding: 9px 13px;
+    max-width: 180px;
+    pointer-events: none;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+    opacity: 0;
+    transform: translateY(4px) scale(0.96);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.card-tooltip.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+.card-tooltip-name {
+    font-family: 'Bangers', cursive;
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 3px;
+}
+.card-tooltip-desc {
+    font-size: 0.68rem;
+    color: var(--dim);
+    line-height: 1.5;
+    font-weight: 600;
+}
+/* Mobile long-press tooltip - shows centered above hand */
+.card-tooltip.mobile-tip {
+    max-width: 200px;
+    text-align: center;
+}
+.arsenal-combo-hint {
+    font-size: 0.6rem; letter-spacing: 0.1em; color: var(--purple);
+    text-align: center; padding: 0 10px;
+}
+
+/* ── PLAYING CARDS ── */
+.play-card {
+    width: 86px; height: 120px; border-radius: 10px; flex-shrink: 0;
+    background: transparent; cursor: grab; position: relative;
+    border: 2px solid transparent;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+    transition: transform 0.2s cubic-bezier(0.22,1,0.36,1), box-shadow 0.2s;
+    margin-right: -20px;
+    display: flex; flex-direction: column;
+    user-select: none; -webkit-user-select: none;
+    -webkit-user-drag: none; -khtml-user-drag: none;
+    touch-action: pan-y;
+}
+.play-card:active { cursor: grabbing; }
+.play-card:last-child { margin-right: 0; }
+.play-card:hover { transform: translateY(-20px) scale(1.06) rotate(-1deg) !important; box-shadow: 4px 4px 22px rgba(0,0,0,0.6); z-index: 10; }
+.play-card.selected {
+    transform: translateY(-30px) scale(1.1) rotate(0deg) !important;
+    border-color: var(--yellow) !important;
+    box-shadow: 0 0 0 2px var(--yellow), 0 12px 30px rgba(255,229,59,0.5), 0 0 40px rgba(255,229,59,0.2) !important;
+    z-index: 11;
+}
+.play-card.combo-selected {
+    border-color: var(--purple) !important;
+    box-shadow: 0 0 0 2px var(--purple), 0 8px 24px rgba(155,93,229,0.4) !important;
+}
+.card-face { user-select: none; -webkit-user-select: none; }
+
+/* Card face */
+.card-face {
+    width: 100%; height: 100%; border-radius: 8px; padding: 6px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    position: relative; overflow: hidden;
+    user-select: none; -webkit-user-select: none;
+}
+.card-face::after {
+    content: '';
+    position: absolute; inset: 0; border-radius: 8px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 50%);
+    pointer-events: none;
+}
+.card-type-name {
+    font-family: 'Bangers', cursive; font-size: 0.82rem; letter-spacing: 0.08em;
+    text-align: center; line-height: 1.1;
+    position: absolute; bottom: 5px; left: 0; right: 0;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
+}
+.card-emoji { font-size: 2.2rem; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+.card-corner {
+    position: absolute; font-size: 0.7rem; letter-spacing: 0.06em; font-weight: 900;
+    font-family: 'Bangers', cursive; text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
+}
+.card-corner.tl { top: 4px; left: 5px; }
+.card-corner.br { bottom: 4px; right: 5px; transform: rotate(180deg); }
+
+/* Card colors by type */
+.card-face.boom       { background: linear-gradient(135deg, #ff3c3c, #ff6b6b); color: #fff; }
+.card-face.defuse     { background: linear-gradient(135deg, #00f5d4, #06d6a0); color: #0a2a25; }
+.card-face.peek       { background: linear-gradient(135deg, #ffe53b, #ff9500); color: #1a1000; }
+.card-face.shuffle    { background: linear-gradient(135deg, #9b5de5, #c77dff); color: #fff; }
+.card-face.skip       { background: linear-gradient(135deg, #f72585, #b5179e); color: #fff; }
+.card-face.reverse    { background: linear-gradient(135deg, #4361ee, #3a0ca3); color: #fff; }
+.card-face.blast      { background: linear-gradient(135deg, #ff7c43, #d62828); color: #fff; }
+.card-face.snatch     { background: linear-gradient(135deg, #2ec4b6, #3a86ff); color: #fff; }
+.card-face.lock       { background: linear-gradient(135deg, #6d6875, #b5838d); color: #fff; }
+.card-face.wild       { background: linear-gradient(135deg, #ffe53b, #9b5de5, #00f5d4); color: #fff; }
+.card-face.chaos      { background: linear-gradient(135deg, #ff3c3c, #ff7c43, #ffe53b); color: #fff; }
+.card-face.surge-card { background: linear-gradient(135deg, #00f5d4, #4361ee); color: #fff; }
+
+/* ── EFFECT OVERLAY ── */
+#effect-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none; opacity: 0; transition: opacity 0.3s;
+}
+#effect-overlay.show { opacity: 1; }
+
+/* ── AI ACTION BANNER ── */
+#ai-action-banner {
+    position: fixed; top: 60px; left: 0; right: 0; z-index: 800;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 16px;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity 0.25s, transform 0.25s;
+}
+#ai-action-banner.show { opacity: 1; transform: translateY(0); }
+.ai-banner-inner {
+    background: rgba(26,26,46,0.96); backdrop-filter: blur(12px);
+    border: 1px solid var(--border-h); border-radius: 12px;
+    padding: 10px 18px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 0.78rem; color: var(--text);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+.ai-banner-avatar { font-size: 1.2rem; }
+.ai-banner-text b { color: var(--yellow); }
+
+/* ── AI THINKING STATE ── */
+.turn-name.ai-thinking::after {
+    content: '';
+    display: inline-block;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--purple);
+    margin-left: 8px;
+    animation: aiPulse 0.6s ease-in-out infinite alternate;
+    vertical-align: middle;
+}
+@keyframes aiPulse { from { opacity: 0.3; transform: scale(0.7); } to { opacity: 1; transform: scale(1.1); } }
+.turn-label.ai-turn-label { color: var(--purple); }
+
+/* ── LAST ACTION BAR ── */
+#last-action-bar {
+    font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--dim); text-align: center; padding: 3px 10px;
+    background: rgba(0,0,0,0.15); border-bottom: 1px solid var(--border);
+    min-height: 22px; transition: opacity 0.4s;
+    flex-shrink: 0;
+}
+#last-action-bar.fade { opacity: 0; }
+
+/* ── DRAW REVEAL ANIMATION ── */
+@keyframes cardFlipIn {
+    0%   { transform: rotateY(90deg) scale(0.8); opacity: 0; }
+    60%  { transform: rotateY(-8deg) scale(1.05); opacity: 1; }
+    100% { transform: rotateY(0deg) scale(1); opacity: 1; }
+}
+.draw-reveal-card-anim {
+    animation: cardFlipIn 0.4s cubic-bezier(0.22,1,0.36,1) both;
+    pointer-events: none;
+}
+.effect-label {
+    font-family: 'Bangers', cursive; font-size: clamp(3.5rem, 14vw, 7rem);
+    letter-spacing: 0.06em; text-align: center; line-height: 1;
+    text-shadow: 4px 4px 0 rgba(0,0,0,0.6), 0 0 40px currentColor;
+    animation: effectSlam 0.35s cubic-bezier(0.15,1.4,0.4,1);
+}
+@keyframes effectSlam {
+    0%   { transform: scale(2.2) rotate(-6deg); opacity: 0; }
+    60%  { transform: scale(0.92) rotate(2deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+.effect-sub {
+    font-family: 'Nunito', sans-serif; font-size: 0.9rem;
+    color: rgba(255,255,255,0.85); text-align: center; margin-top: 8px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    font-weight: 700;
+    animation: effectFadeUp 0.3s 0.1s ease both;
+}
+@keyframes effectFadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* BOOM SHAKE */
+@keyframes boomShake {
+    0%,100% { transform: translate(0,0) rotate(0deg); }
+    10% { transform: translate(-8px,4px) rotate(-2deg); }
+    20% { transform: translate(8px,-4px) rotate(2deg); }
+    30% { transform: translate(-6px,6px) rotate(-1deg); }
+    40% { transform: translate(6px,-6px) rotate(1deg); }
+    50% { transform: translate(-4px,4px) rotate(-1deg); }
+    60% { transform: translate(4px,-4px) rotate(1deg); }
+}
+.screen.shake { animation: boomShake 0.6s ease-in-out; }
+
+/* ── TARGET MODAL (snatch/blast/etc.) ── */
+.modal-overlay {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(10,10,26,0.85); backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+    opacity: 0; pointer-events: none; transition: opacity 0.25s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-box {
+    background: var(--surface); border: 1px solid var(--border-h);
+    border-radius: 16px; padding: 28px 24px; max-width: 440px; width: 100%;
+    animation: modalUp 0.3s cubic-bezier(0.22,1,0.36,1);
+}
+@keyframes modalUp { from { transform: translateY(20px); opacity: 0; } to { transform: none; opacity: 1; } }
+.modal-title {
+    font-family: 'Bangers', cursive; font-size: 1.8rem; letter-spacing: 0.06em;
+    text-align: center; margin-bottom: 6px;
+}
+.modal-sub { font-size: 0.72rem; color: var(--dim); text-align: center; margin-bottom: 18px; }
+.modal-targets { display: flex; flex-direction: column; gap: 8px; }
+.target-btn {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px; border-radius: 10px;
+    background: var(--bg); border: 1px solid var(--border);
+    cursor: pointer; transition: all 0.2s; font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 700;
+}
+.target-btn:hover { border-color: var(--border-h); background: var(--bg2); }
+.target-av { font-size: 1.4rem; }
+.target-info { flex: 1; }
+.target-name { color: var(--text); }
+.target-meta { font-size: 0.6rem; color: var(--dim); }
+.modal-cancel {
+    margin-top: 12px; width: 100%; padding: 8px;
+    background: none; border: 1px solid var(--border); border-radius: 8px;
+    color: var(--dim); cursor: pointer; font-family: 'Nunito', sans-serif;
+    font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; transition: all 0.2s;
+}
+.modal-cancel:hover { border-color: var(--border-h); color: var(--text); }
+
+/* PEEK MODAL */
+.peek-cards { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 14px 0; }
+.peek-card-mini {
+    width: 70px; height: 98px; border-radius: 8px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    font-size: 0.55rem; font-family: 'Bangers', cursive; letter-spacing: 0.04em;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+}
+.peek-emoji { font-size: 1.6rem; }
+
+/* ── DEFUSE INSERT MODAL ── */
+.insert-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin: 14px 0; }
+.insert-btn {
+    padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--bg); color: var(--text); cursor: pointer;
+    font-family: 'Bangers', cursive; font-size: 1rem; letter-spacing: 0.06em; transition: all 0.2s;
+}
+.insert-btn:hover { border-color: var(--cyan); color: var(--cyan); background: rgba(0,245,212,0.08); }
+
+/* ── ELIMINATION OVERLAY ── */
+#elim-overlay {
+    position: fixed; inset: 0; z-index: 600;
+    background: rgba(255,60,60,0.15); backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.4s;
+}
+#elim-overlay.show { opacity: 1; pointer-events: all; }
+.elim-box {
+    background: var(--surface); border: 2px solid var(--red);
+    border-radius: 16px; padding: 32px 28px; text-align: center; max-width: 380px; width: 90%;
+    box-shadow: var(--glow-r);
+}
+.elim-icon { font-size: 4rem; margin-bottom: 8px; display: block; }
+.elim-title {
+    font-family: 'Bangers', cursive; font-size: 2.5rem; letter-spacing: 0.08em;
+    color: var(--red); text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+}
+.elim-name { color: var(--text); font-size: 1.1rem; margin: 8px 0; }
+.elim-continue {
+    margin-top: 16px; padding: 10px 28px; border-radius: 10px; border: none;
+    font-family: 'Bangers', cursive; font-size: 1.2rem; letter-spacing: 0.08em;
+    background: var(--red); color: #fff; cursor: pointer; transition: all 0.15s;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.4);
+}
+.elim-continue:hover { transform: translateY(-2px); box-shadow: 0 5px 0 rgba(0,0,0,0.4), var(--glow-r); }
+
+/* ── VICTORY SCREEN ── */
+#screen-victory {
+    background: #0a0a1a; text-align: center; gap: 16px;
+    overflow-y: auto;
+}
+.victory-canvas { position: fixed; inset: 0; pointer-events: none; }
+.victory-emoji { font-size: 4rem; margin-bottom: 4px; }
+.victory-title {
+    font-family: 'Bangers', cursive; font-size: clamp(3rem, 12vw, 5rem);
+    letter-spacing: 0.08em; color: var(--yellow);
+    text-shadow: 4px 4px 0 var(--red), 8px 8px 0 rgba(0,0,0,0.3);
+    animation: logoBounce 0.6s cubic-bezier(0.36,0.07,0.19,0.97) both;
+}
+.victory-winner { font-size: 1.1rem; color: var(--dim); margin-top: -6px; }
+.victory-winner b { color: var(--cyan); font-family: 'Bangers', cursive; font-size: 1.5rem; letter-spacing: 0.06em; }
+.victory-stats {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 20px; max-width: 360px; width: 100%; text-align: left;
+}
+.victory-stats-title { font-size: 0.55rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--dim); margin-bottom: 10px; }
+.vstat-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.78rem; }
+.vstat-row:last-child { border-bottom: none; }
+.vstat-label { color: var(--dim); }
+.vstat-val { color: var(--text); font-weight: 700; }
+.victory-btns { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.victory-btn {
+    padding: 10px 22px; border-radius: 10px; cursor: pointer;
+    font-family: 'Bangers', cursive; font-size: 1.1rem; letter-spacing: 0.08em;
+    transition: all 0.15s;
+}
+.victory-btn.primary { background: var(--yellow); color: #1a1a2e; border: none; box-shadow: 0 3px 0 rgba(0,0,0,0.4); }
+.victory-btn.primary:hover { transform: translateY(-2px); box-shadow: 0 5px 0 rgba(0,0,0,0.4), var(--glow-y); }
+.victory-btn.secondary { background: none; color: var(--dim); border: 1px solid var(--border); }
+.victory-btn.secondary:hover { border-color: var(--border-h); color: var(--text); }
+
+/* ── ABANDON CONFIRM ── */
+#abandon-modal {
+    position: fixed; inset: 0; z-index: 800;
+    background: rgba(10,10,26,0.85); backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+    opacity: 0; pointer-events: none; transition: opacity 0.25s;
+}
+#abandon-modal.open { opacity: 1; pointer-events: all; }
+.abandon-box {
+    background: var(--surface); border: 1px solid var(--border-h);
+    border-radius: 16px; padding: 28px 24px; max-width: 360px; width: 100%; text-align: center;
+}
+.abandon-title { font-family: 'Bangers', cursive; font-size: 1.8rem; letter-spacing: 0.06em; color: var(--red); margin-bottom: 8px; }
+.abandon-sub { font-size: 0.75rem; color: var(--dim); line-height: 1.6; margin-bottom: 20px; }
+.abandon-btns { display: flex; gap: 10px; }
+.abandon-stay {
+    flex: 1; padding: 10px; border-radius: 8px;
+    background: var(--bg); border: 1px solid var(--border); color: var(--text);
+    cursor: pointer; font-family: 'Nunito', sans-serif; font-size: 0.8rem; font-weight: 700; transition: all 0.2s;
+}
+.abandon-stay:hover { border-color: var(--border-h); }
+.abandon-leave {
+    flex: 1; padding: 10px; border-radius: 8px;
+    background: var(--red); border: none; color: #fff;
+    cursor: pointer; font-family: 'Nunito', sans-serif; font-size: 0.8rem; font-weight: 700; transition: all 0.2s;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.4);
+}
+.abandon-leave:hover { transform: translateY(-1px); box-shadow: 0 5px 0 rgba(0,0,0,0.4), var(--glow-r); }
+
+/* ── HELP MODAL ── */
+#help-modal {
+    position: fixed; inset: 0; z-index: 900;
+    background: rgba(10,10,26,0.88); backdrop-filter: blur(10px);
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+    opacity: 0; pointer-events: none; transition: opacity 0.25s;
+}
+#help-modal.open { opacity: 1; pointer-events: all; }
+.help-box {
+    background: var(--surface); border: 1px solid var(--border-h);
+    border-radius: 16px; max-width: 520px; width: 100%; max-height: 88vh;
+    overflow-y: auto; scrollbar-width: none;
+}
+.help-box::-webkit-scrollbar { display: none; }
+.help-header {
+    padding: 20px 24px 14px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: var(--surface);
+}
+.help-title { font-family: 'Bangers', cursive; font-size: 1.6rem; letter-spacing: 0.06em; }
+.help-close {
+    width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--border-h);
+    background: transparent; color: var(--dim); cursor: pointer; font-size: 14px;
+    display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-family: 'Nunito', sans-serif;
+}
+.help-close:hover { background: var(--bg); color: var(--text); }
+.help-body { padding: 18px 24px; display: flex; flex-direction: column; gap: 16px; }
+.help-section-title {
+    font-size: 0.55rem; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--yellow); margin-bottom: 8px;
+}
+.help-steps { display: flex; flex-direction: column; gap: 8px; }
+.help-step { display: flex; gap: 12px; align-items: flex-start; }
+.help-step-num {
+    width: 22px; height: 22px; border-radius: 50%; background: var(--yellow); color: #1a1a2e;
+    font-family: 'Bangers', cursive; font-size: 0.85rem; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+}
+.help-step-text { font-size: 0.78rem; color: var(--dim); line-height: 1.55; }
+.help-step-text b { color: var(--text); }
+.help-cards-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.help-card-item { display: flex; gap: 8px; align-items: center; font-size: 0.72rem; padding: 6px 0; }
+.help-card-emoji { font-size: 1.2rem; width: 28px; text-align: center; flex-shrink: 0; }
+.help-card-desc { color: var(--dim); line-height: 1.4; }
+.help-card-desc b { color: var(--text); }
+.help-got-it {
+    margin: 4px 24px 20px; padding: 10px; border-radius: 10px; border: none;
+    background: var(--yellow); color: #1a1a2e; cursor: pointer;
+    font-family: 'Bangers', cursive; font-size: 1.2rem; letter-spacing: 0.08em;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.4); transition: all 0.15s;
+}
+.help-got-it:hover { transform: translateY(-2px); box-shadow: 0 5px 0 rgba(0,0,0,0.4), var(--glow-y); }
+
+/* ── DESKTOP HINT ── */
+#desktop-hint {
+    display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    z-index: 390; align-items: center; gap: 10px;
+    background: rgba(26,26,46,0.95); backdrop-filter: blur(12px);
+    border: 1px solid var(--border-h); border-radius: 30px;
+    padding: 8px 18px; pointer-events: none;
+    animation: fadeUpHint 0.5s ease 1.5s both;
+    transition: opacity 0.4s;
+}
+#desktop-hint.hidden-hint { opacity: 0 !important; }
+.dh-text { font-family: 'Nunito', sans-serif; font-size: 0.55rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
+.dh-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--yellow); opacity: 0.5; flex-shrink: 0; }
+@media (hover: none) and (pointer: coarse) { #desktop-hint { display: flex; } }
+@keyframes fadeUpHint { from { opacity:0; transform: translateX(-50%) translateY(10px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }
+
+/* ── MISC ── */
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
+
+/* Draw reveal card flip */
+@keyframes cardFlipIn {
+    0%   { transform: rotateY(90deg) scale(0.8); opacity:0; }
+    60%  { transform: rotateY(-8deg) scale(1.05); opacity:1; }
+    100% { transform: rotateY(0deg) scale(1); opacity:1; }
+}
+.draw-reveal-card-anim { animation: cardFlipIn 0.45s cubic-bezier(0.22,1,0.36,1) both; }
+
+/* BOOM pop */
+@keyframes boomPop {
+    0%   { transform: scale(0.3) rotate(-15deg); opacity:0; }
+    50%  { transform: scale(1.3) rotate(5deg); opacity:1; }
+    75%  { transform: scale(0.9) rotate(-2deg); }
+    100% { transform: scale(1) rotate(0deg); opacity:1; }
+}
+/* BOOM screen shake */
+@keyframes boomScreenShake {
+    0%,100% { transform: translate(0,0); }
+    15% { transform: translate(-10px,5px); }
+    30% { transform: translate(10px,-5px); }
+    45% { transform: translate(-7px,7px); }
+    60% { transform: translate(7px,-7px); }
+    75% { transform: translate(-4px,4px); }
+    90% { transform: translate(4px,-4px); }
+}
+#screen-boom.shake-boom { animation: boomScreenShake 0.55s ease-in-out; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+    .mode-cards { flex-direction: column; align-items: center; }
+    .mode-card { max-width: 100%; width: 100%; }
+    .game-table { flex-direction: column; gap: 16px; }
+    .help-cards-grid { grid-template-columns: 1fr; }
+    .hand-area { height: 150px; }
+    .play-card { width: 72px; height: 100px; }
+    .card-emoji { font-size: 1.6rem; }
+}
+@media (max-width: 480px) {
+    .draw-pile, .discard-pile { width: 78px; height: 109px; }
+    .play-card { width: 66px; height: 92px; }
+    .card-emoji { font-size: 1.4rem; }
+    .turn-name { font-size: 1rem; }
+    .action-btn { font-size: 0.9rem; padding: 8px 14px; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-blobs">
+    <div class="blob blob1"></div>
+    <div class="blob blob2"></div>
+    <div class="blob blob3"></div>
+    <div class="blob blob4"></div>
+</div>
+
+<!-- CARD FLIGHT ELEMENT -->
+<div id="card-flight"></div>
+
+<!-- AI ACTION BANNER -->
+<div id="ai-action-banner">
+    <div class="ai-banner-inner">
+        <span class="ai-banner-avatar" id="ai-banner-avatar">🤖</span>
+        <span class="ai-banner-text" id="ai-banner-text">AI played a card</span>
+    </div>
+</div>
+
+<!-- HEADER (hidden on menu) -->
+<header id="game-header" class="on-menu">
+    <div class="hdr-left">
+        <a href="../index.html" class="hdr-portal" title="Back to The Grid">
+            <span class="hdr-portal-icon">⌂</span>
+        </a>
+        <button class="hdr-back" id="hdr-back-btn">← LOBBY</button>
+    </div>
+    <div class="hdr-title">MAYHEM</div>
+    <div class="hdr-right">
+        <span class="hdr-mode-pill classic" id="hdr-mode-pill">CLASSIC</span>
+        <button class="hdr-btn" id="sound-btn" title="Toggle sound">🔊</button>
+        <button class="hdr-btn" id="help-btn" title="How to play">?</button>
+    </div>
+</header>
+
+<!-- MODE SELECT -->
+<div class="screen" id="screen-mode">
+    <div class="mode-logo">MAYHEM</div>
+    <div class="mode-tagline">The card game where chaos is the only rule</div>
+    <div class="mode-cards">
+        <div class="mode-card classic" data-mode="classic">
+            <span class="mc-icon">💣</span>
+            <div class="mc-name">Classic</div>
+            <p class="mc-desc">Draw cards. Play actions. Avoid the bomb. Last player standing wins.</p>
+            <span class="mc-tag">2–6 players</span>
+        </div>
+        <div class="mode-card arsenal" data-mode="arsenal">
+            <span class="mc-icon">⚡</span>
+            <div class="mc-name">Arsenal</div>
+            <p class="mc-desc">Classic rules + hand limit of 7. Combo matching cards for amplified effects.</p>
+            <span class="mc-tag">Strategic</span>
+        </div>
+        <div class="mode-card surge" data-mode="surge">
+            <span class="mc-icon">🌊</span>
+            <div class="mc-name">Surge</div>
+            <p class="mc-desc">Draft new cards from a pool each round. Build your deck, outsmart everyone.</p>
+            <span class="mc-tag">Deck-building</span>
+        </div>
+    </div>
+    <button class="mode-help-btn" id="mode-help-btn" title="How to play">?</button>
+    <a href="../index.html" class="mode-portal-link">← THE GRID</a>
+</div>
+
+<!-- PLAYER SETUP -->
+<div class="screen hidden" id="screen-setup">
+    <div class="setup-inner">
+        <div class="setup-title">SET UP <span id="setup-mode-name">CLASSIC</span></div>
+        <div class="setup-section" id="surge-info-section" style="display:none;">
+            <div class="surge-info">
+                <b>SURGE mode:</b> Each round starts with a draft phase — 3 cards revealed from a shared pool. Pick 1 to add to your deck. Then play Classic rules. Your deck grows stronger as the game goes on.
+            </div>
+        </div>
+        <div class="setup-section">
+            <div class="setup-section-label">Number of Players</div>
+            <div class="player-count-row" id="player-count-row">
+                <button class="pc-btn active" data-count="2">2</button>
+                <button class="pc-btn" data-count="3">3</button>
+                <button class="pc-btn" data-count="4">4</button>
+                <button class="pc-btn" data-count="5">5</button>
+                <button class="pc-btn" data-count="6">6</button>
+            </div>
+        </div>
+        <div class="setup-section">
+            <div class="ai-row">
+                <div>
+                    <div class="ai-label">AI Players</div>
+                    <div class="ai-sub" id="ai-sub-label">Off — all human players</div>
+                </div>
+                <!-- Toggle switch -->
+                <div class="ai-toggle-wrap" id="ai-toggle-wrap">
+                    <span class="ai-tog-label" id="ai-tog-off-label" style="opacity:1">Off</span>
+                    <button class="ai-toggle-switch" id="ai-toggle-switch" aria-label="Toggle AI">
+                        <div class="ai-toggle-knob" id="ai-toggle-knob"></div>
+                    </button>
+                    <span class="ai-tog-label" id="ai-tog-on-label" style="opacity:0.4">On</span>
+                </div>
+            </div>
+            <!-- AI count + difficulty — hidden until toggled on -->
+            <div id="ai-options-row" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);display:none;flex-direction:column;gap:14px;">
+                <div>
+                    <div class="setup-section-label" style="margin-bottom:10px;">How many AI? <span id="ai-count-max-hint" style="color:var(--dim);font-weight:400;font-size:0.9em;"></span></div>
+                    <div class="ai-count-row" id="ai-count-row"></div>
+                </div>
+                <div>
+                    <div class="setup-section-label" style="margin-bottom:10px;">Difficulty</div>
+                    <div style="display:flex;gap:8px;">
+                        <button class="diff-opt active" data-diff="easy">Easy</button>
+                        <button class="diff-opt" data-diff="medium">Medium</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="setup-section">
+            <div class="setup-section-label">Player Names</div>
+            <div class="player-list" id="player-list"></div>
+        </div>
+        <button class="start-btn" id="start-btn">DEAL THE CARDS →</button>
+        <button class="setup-back" id="setup-back-btn">← Back to Mode Select</button>
+    </div>
+</div>
+
+<!-- PASS SCREEN -->
+<div class="screen hidden" id="screen-pass">
+    <div class="pass-icon">📱</div>
+    <div class="pass-title">PASS THE DEVICE</div>
+    <div class="pass-subtitle">Hand the phone to:</div>
+    <div class="pass-player" id="pass-player-name">Player 2</div>
+    <p style="font-size:0.7rem;color:var(--dim);text-align:center;max-width:280px;">Keep the screen hidden until they're ready. Their hand will be revealed when they tap.</p>
+    <button class="pass-btn" id="pass-reveal-btn">I'M READY — REVEAL →</button>
+</div>
+
+<!-- DRAW REVEAL OVERLAY (shown after drawing a non-bomb card) -->
+<div class="modal-overlay" id="draw-reveal-modal">
+    <div class="modal-box" style="text-align:center;max-width:320px;">
+        <div style="font-size:0.55rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--dim);margin-bottom:10px;">You drew</div>
+        <div id="draw-reveal-card" style="display:flex;justify-content:center;margin-bottom:16px;"></div>
+        <div id="draw-reveal-name" style="font-family:'Bangers',cursive;font-size:1.6rem;letter-spacing:0.06em;margin-bottom:4px;"></div>
+        <div id="draw-reveal-desc" style="font-size:0.72rem;color:var(--dim);margin-bottom:18px;"></div>
+        <button class="pass-btn" id="draw-reveal-continue" style="width:100%;padding:12px;font-size:1.1rem;">NEXT PLAYER →</button>
+    </div>
+</div>
+
+<!-- BOOM SCREEN (full screen reveal + defuse flow) -->
+<div class="screen hidden" id="screen-boom">
+    <div id="boom-shake-wrap" style="display:flex;flex-direction:column;align-items:center;gap:20px;text-align:center;">
+        <div style="font-size:6rem;animation:boomPop 0.5s cubic-bezier(0.36,0.07,0.19,0.97) both;">💣</div>
+        <div id="boom-title" style="font-family:'Bangers',cursive;font-size:clamp(2.5rem,10vw,4.5rem);letter-spacing:0.08em;color:var(--red);text-shadow:4px 4px 0 rgba(0,0,0,0.5);">YOU HIT A BOOM!</div>
+        <div id="boom-player-name" style="font-size:0.9rem;color:var(--dim);">Loading…</div>
+
+        <!-- State A: has defuse -->
+        <div id="boom-has-defuse" style="display:none;flex-direction:column;align-items:center;gap:14px;width:100%;max-width:380px;">
+            <div style="background:rgba(0,245,212,0.08);border:1px solid rgba(0,245,212,0.3);border-radius:12px;padding:14px 20px;">
+                <div style="font-size:1.5rem;margin-bottom:4px;">🛡️</div>
+                <div style="font-family:'Bangers',cursive;font-size:1.4rem;letter-spacing:0.06em;color:var(--cyan);">YOU HAVE A DEFUSE!</div>
+                <div style="font-size:0.72rem;color:var(--dim);margin-top:4px;">Use it to survive — then choose where to hide the bomb.</div>
+            </div>
+            <button class="pass-btn" id="boom-use-defuse-btn" style="background:var(--cyan);color:#0a2a25;width:100%;max-width:320px;">🛡️ USE DEFUSE CARD →</button>
+        </div>
+
+        <!-- State B: no defuse (eliminated) -->
+        <div id="boom-no-defuse" style="display:none;flex-direction:column;align-items:center;gap:14px;width:100%;max-width:380px;">
+            <div style="background:rgba(255,60,60,0.08);border:1px solid rgba(255,60,60,0.3);border-radius:12px;padding:14px 20px;">
+                <div style="font-size:0.85rem;color:var(--dim);">No Defuse card in hand. You're eliminated 💀</div>
+            </div>
+            <button class="pass-btn" id="boom-elim-continue-btn" style="background:var(--red);width:100%;max-width:320px;">CONTINUE →</button>
+        </div>
+    </div>
+</div>
+
+<!-- DEFUSE INSERT SCREEN (shown after using defuse) -->
+<div class="screen hidden" id="screen-defuse">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;width:100%;max-width:420px;">
+        <div style="font-size:3rem;">🛡️</div>
+        <div style="font-family:'Bangers',cursive;font-size:2.2rem;letter-spacing:0.08em;color:var(--cyan);">DEFUSED!</div>
+        <div style="font-size:0.8rem;color:var(--dim);line-height:1.6;max-width:300px;">Now choose where to hide the 💣 BOOM back in the deck. Be sneaky.</div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;width:100%;">
+            <div class="setup-section-label" style="margin-bottom:12px;">Insert bomb at position:</div>
+            <div id="defuse-insert-row" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;"></div>
+            <div style="font-size:0.62rem;color:var(--dim);margin-top:10px;">Deck has <span id="defuse-deck-count">0</span> cards. Position 1 = top (next to draw).</div>
+        </div>
+    </div>
+</div>
+
+<!-- SURGE DRAFT SCREEN -->
+<div class="screen hidden" id="screen-draft">
+    <div class="draft-title">✨ SURGE DRAFT</div>
+    <div class="draft-sub" id="draft-sub">Round X — pick 1 card to add to your deck</div>
+    <div class="draft-player-info" id="draft-player-info">Drafting for <b>Player 1</b></div>
+    <div class="draft-pool" id="draft-pool"></div>
+    <button class="draft-skip" id="draft-skip-btn">Skip — don't add a card</button>
+</div>
+
+<!-- GAME SCREEN -->
+<div class="screen hidden" id="screen-game">
+    <div class="turn-bar">
+        <div class="turn-player">
+            <span class="turn-avatar" id="turn-avatar">😊</span>
+            <div>
+                <div class="turn-label" id="turn-label">Current Turn</div>
+                <div class="turn-name" id="turn-name">Player 1</div>
+            </div>
+        </div>
+        <div class="turn-deck-info">
+            <div class="deck-count">
+                <span>Deck</span><span class="deck-num" id="deck-count">20</span>
+            </div>
+            <div class="deck-count">
+                <span>Round</span><span class="deck-num" id="round-count">1</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="players-row" id="players-row"></div>
+    <div id="last-action-bar"></div>
+
+    <div class="game-table">
+        <div class="pile-area">
+            <div class="pile-label">Draw Pile</div>
+            <div class="draw-pile" id="draw-pile">
+                <!-- Card back SVG -->
+                <svg width="100%" height="100%" viewBox="0 0 90 126" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;border-radius:8px;">
+                    <defs>
+                        <linearGradient id="cbg" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#2a1a5e"/>
+                            <stop offset="100%" style="stop-color:#1a1040"/>
+                        </linearGradient>
+                        <pattern id="cpat" x="0" y="0" width="14" height="14" patternUnits="userSpaceOnUse">
+                            <rect width="14" height="14" fill="none"/>
+                            <path d="M7 0 L14 7 L7 14 L0 7 Z" fill="none" stroke="rgba(155,93,229,0.18)" stroke-width="0.8"/>
+                        </pattern>
+                    </defs>
+                    <rect width="90" height="126" rx="8" fill="url(#cbg)"/>
+                    <rect width="90" height="126" rx="8" fill="url(#cpat)"/>
+                    <rect x="5" y="5" width="80" height="116" rx="5" fill="none" stroke="rgba(155,93,229,0.35)" stroke-width="1"/>
+                    <rect x="10" y="10" width="70" height="106" rx="3" fill="none" stroke="rgba(155,93,229,0.15)" stroke-width="0.8"/>
+                    <!-- Center emblem -->
+                    <text x="45" y="54" text-anchor="middle" font-family="Bangers,cursive" font-size="22" letter-spacing="1" fill="rgba(155,93,229,0.7)">MAY</text>
+                    <text x="45" y="76" text-anchor="middle" font-family="Bangers,cursive" font-size="22" letter-spacing="1" fill="rgba(255,229,59,0.7)">HEM</text>
+                    <!-- Corner diamonds -->
+                    <polygon points="14,14 19,18 14,22 9,18" fill="rgba(155,93,229,0.5)"/>
+                    <polygon points="76,104 81,108 76,112 71,108" fill="rgba(155,93,229,0.5)"/>
+                </svg>
+                <div id="draw-pile-count" style="position:absolute;bottom:6px;left:0;right:0;text-align:center;font-size:0.55rem;letter-spacing:0.12em;font-family:'Nunito',sans-serif;color:rgba(240,240,255,0.6);text-transform:uppercase;z-index:2;">20 cards</div>
+            </div>
+        </div>
+        <div class="pile-area">
+            <div class="pile-label">Discard Pile</div>
+            <div class="discard-pile" id="discard-pile">
+                <div class="discard-top" id="discard-top">
+                    <!-- Empty slot indicator -->
+                    <svg width="50" height="50" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg" style="opacity:0.18">
+                        <rect x="3" y="3" width="44" height="44" rx="6" fill="none" stroke="rgba(240,240,255,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+                        <line x1="15" y1="25" x2="35" y2="25" stroke="rgba(240,240,255,0.6)" stroke-width="1.5"/>
+                        <line x1="25" y1="15" x2="25" y2="35" stroke="rgba(240,240,255,0.6)" stroke-width="1.5"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-row" id="action-row">
+        <div class="arsenal-combo-hint" id="combo-hint" style="display:none;width:100%;text-align:center;"></div>
+        <button class="action-btn sort" id="sort-action-btn" title="Sort hand by card type">⇅ SORT</button>
+        <button class="action-btn skip" id="skip-action-btn" title="Play a SKIP card from your hand to end turn without drawing">PLAY SKIP</button>
+        <button class="action-btn draw" id="draw-action-btn">DRAW CARD</button>
+    </div>
+
+    <div id="card-context-strip" style="display:none;padding:5px 14px;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;text-align:center;flex-shrink:0;border-top:1px solid var(--border);"></div>
+
+    <div class="hand-area">
+        <div class="hand-scroll" id="hand-scroll"></div>
+    </div>
+</div>
+
+<!-- VICTORY SCREEN -->
+<div class="screen hidden" id="screen-victory">
+    <canvas class="victory-canvas" id="victory-canvas"></canvas>
+    <div class="victory-emoji">🏆</div>
+    <div class="victory-title" id="victory-title">WINNER!</div>
+    <div class="victory-winner" id="victory-winner">Congratulations to <b>Player 1</b></div>
+    <div class="victory-stats" id="victory-stats"></div>
+    <div id="pb-new-badge" style="display:none;margin:8px auto;padding:5px 14px;border-radius:14px;background:rgba(255,229,59,0.12);border:1px solid rgba(255,229,59,0.4);font-size:12px;font-weight:700;letter-spacing:0.1em;color:#ffe53b;text-align:center;">👑 New Personal Best!</div>
+    <div class="victory-btns">
+        <button class="victory-btn primary" id="victory-play-again">PLAY AGAIN</button>
+        <button class="victory-btn secondary" id="victory-main-menu">MAIN MENU</button>
+    </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="target-modal">
+    <div class="modal-box">
+        <div class="modal-title" id="target-modal-title">Choose Target</div>
+        <div class="modal-sub" id="target-modal-sub">Select a player</div>
+        <div class="modal-targets" id="target-modal-targets"></div>
+        <button class="modal-cancel" id="target-modal-cancel">Cancel</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="peek-modal">
+    <div class="modal-box">
+        <div class="modal-title">👁️ PEEK</div>
+        <div class="modal-sub">Top 3 cards of the draw pile:</div>
+        <div class="peek-cards" id="peek-cards"></div>
+        <button class="modal-cancel" id="peek-modal-close">Got it</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="chaos-modal">
+    <div class="modal-box" style="text-align:center;">
+        <div class="modal-title">🌪️ CHAOS!</div>
+        <div class="modal-sub">Everyone passes their hand one seat to the left.</div>
+        <div id="chaos-result" style="margin:14px 0;font-size:0.8rem;line-height:1.6;color:var(--dim);"></div>
+        <button class="modal-cancel" id="chaos-modal-close">OK</button>
+    </div>
+</div>
+
+<!-- ABANDON CONFIRM -->
+<div id="abandon-modal">
+    <div class="abandon-box">
+        <div class="abandon-title">ABANDON GAME?</div>
+        <div class="abandon-sub">Your current game will be lost. The chaos will remain unresolved.</div>
+        <div class="abandon-btns">
+            <button class="abandon-stay" id="abandon-stay">Keep Playing</button>
+            <button class="abandon-leave" id="abandon-leave">Abandon</button>
+        </div>
+    </div>
+</div>
+
+<!-- EFFECT OVERLAY -->
+<div id="effect-overlay">
+    <div style="text-align:center;">
+        <div class="effect-label" id="effect-label">SKIP!</div>
+        <div class="effect-sub" id="effect-sub"></div>
+    </div>
+</div>
+
+<!-- DESKTOP HINT -->
+<div id="desktop-hint">
+    <div class="dh-dot"></div>
+    <span class="dh-text">Best experienced on desktop</span>
+    <div class="dh-dot"></div>
+</div>
+
+<!-- HELP MODAL -->
+<div id="help-modal">
+    <div class="help-box">
+        <div class="help-header">
+            <div class="help-title">HOW TO PLAY</div>
+            <button class="help-close" id="help-close">✕</button>
+        </div>
+        <div class="help-body">
+            <div>
+                <div class="help-section-title">The Basics</div>
+                <div class="help-steps">
+                    <div class="help-step"><div class="help-step-num">1</div><div class="help-step-text">On your turn, <b>play cards from your hand</b> (optional) to mess with other players, then <b>draw a card</b> from the deck.</div></div>
+                    <div class="help-step"><div class="help-step-num">2</div><div class="help-step-text">If you draw a <b>💣 BOOM</b> card, you're eliminated — unless you play a <b>🛡️ DEFUSE</b> card!</div></div>
+                    <div class="help-step"><div class="help-step-num">3</div><div class="help-step-text">When you defuse, choose where to reinsert the bomb into the deck. Strategize — and good luck.</div></div>
+                    <div class="help-step"><div class="help-step-num">4</div><div class="help-step-text">The <b>last player standing</b> wins. Use action cards to force others to draw, steal their cards, or shuffle the deck.</div></div>
+                </div>
+            </div>
+            <div>
+                <div class="help-section-title">Card Reference</div>
+                <div class="help-cards-grid">
+                    <div class="help-card-item"><div class="help-card-emoji">💣</div><div class="help-card-desc"><b>BOOM</b> — Eliminated! Unless you have a Defuse.</div></div>
+                    <div class="help-card-item"><div class="help-card-emoji">🛡️</div><div class="help-card-desc"><b>DEFUSE</b> — Cancel a BOOM, reinsert it anywhere.</div></div>
+                    <div class="help-card-item"><div class="help-card-emoji">👁️</div><div class="help-card-desc"><b>PEEK</b> — Look at the top 3 deck cards.</div></div>
+                    <div class="help-card-item"><div class="help-card-emoji">🔀</div><div class="help-card-desc"><b>SHUFFLE</b> — Randomize the entire deck.</div></div>
+                    <div class="help-card-item"><div class="help-card-emoji">⏭️</div><div class="help-card-desc"><b>SKIP</b> — End your turn without drawing.</div></div>
+                    <div class="help-card-item"><div class="help-card-emoji">🔁</div><div class="help-card-desc"><b>REVERSE</b> — Flip turn order.</div></div>
+                    <div class="help-card-item"><div class="help-card-emoji">💥</div><div class="help-card-desc"><b>BLAST</b> — Target player draws 2 cards.</div></div>
+                    <div class="help-card-item"><div class="help-card-emoji">🤲</div><div class="help-card-desc"><b>SNATCH</b> — Steal a random card from anyone.</div></div>
+                    <div class="help-card-item"><div class="help-card-emoji">🔒</div><div class="help-card-desc"><b>LOCK</b> — Target can't play cards next turn.</div></div>
+                    <div class="help-card-item"><div class="help-card-emoji">🃏</div><div class="help-card-desc"><b>WILD</b> — Copy the last card played.</div></div>
+                    <div class="help-card-item"><div class="help-card-emoji">🌪️</div><div class="help-card-desc"><b>CHAOS</b> — Everyone passes hands one seat left.</div></div>
+                    <div class="help-card-item"><div class="help-card-emoji">✨</div><div class="help-card-desc"><b>SURGE</b> — Draw 2 extra draft cards next round.</div></div>
+                </div>
+            </div>
+            <div>
+                <div class="help-section-title" id="help-mode-title">Arsenal Mode Extras</div>
+                <div class="help-steps" id="help-mode-steps">
+                    <div class="help-step"><div class="help-step-num">→</div><div class="help-step-text"><b>Hand limit of 7 cards.</b> If you exceed this after drawing, discard down.</div></div>
+                    <div class="help-step"><div class="help-step-num">→</div><div class="help-step-text"><b>Combo:</b> Play 2 matching cards for a double effect — BLAST forces 4 draws, SNATCH steals 2, etc.</div></div>
+                </div>
+            </div>
+        </div>
+        <button class="help-got-it" id="help-got-it">GOT IT!</button>
+    </div>
+</div>
+
+<script>
+// ── SUPABASE ──
+const SUPABASE_URL = 'https://kepbwovgwvsfycmvsztu.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtlcGJ3b3Znd3ZzZnljbXZzenR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0OTkxNDMsImV4cCI6MjA5MDA3NTE0M30.cAS58qI-4N1Ddgrd4tqIxwjOj_u5l2QL5yNmXQVRr7c';
+
+async function submitScore(name, game, score) {
+    try {
+        await fetch(`${SUPABASE_URL}/rest/v1/scores`, {
+            method: 'POST',
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+            body: JSON.stringify({ name, game, score, date: new Date().toISOString().split('T')[0] })
+        });
+    } catch(e) {}
+}
+
+// Audio context fix
+let audioCtx;
+let soundMuted = false;
+
+function getAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+}
+document.addEventListener('click', () => { try { getAudio(); } catch(e) {} }, { once: true });
+
+// Sound toggle
+document.getElementById('sound-btn').addEventListener('click', () => {
+    soundMuted = !soundMuted;
+    document.getElementById('sound-btn').textContent = soundMuted ? '🔇' : '🔊';
+});
+
+function playSound(type) {
+    if (soundMuted) return;
+    try {
+        const ctx = getAudio();
+        const g = ctx.createGain();
+        g.connect(ctx.destination);
+        const o = ctx.createOscillator();
+        o.connect(g);
+        if (type === 'draw') {
+            o.frequency.setValueAtTime(300, ctx.currentTime);
+            o.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.08);
+            g.gain.setValueAtTime(0.2, ctx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+            o.start(); o.stop(ctx.currentTime + 0.15);
+        } else if (type === 'play') {
+            o.frequency.setValueAtTime(500, ctx.currentTime);
+            o.frequency.exponentialRampToValueAtTime(900, ctx.currentTime + 0.1);
+            g.gain.setValueAtTime(0.15, ctx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+            o.start(); o.stop(ctx.currentTime + 0.12);
+        } else if (type === 'boom') {
+            o.type = 'sawtooth';
+            o.frequency.setValueAtTime(200, ctx.currentTime);
+            o.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.5);
+            g.gain.setValueAtTime(0.5, ctx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+            o.start(); o.stop(ctx.currentTime + 0.5);
+        } else if (type === 'defuse') {
+            o.frequency.setValueAtTime(600, ctx.currentTime);
+            o.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.2);
+            g.gain.setValueAtTime(0.2, ctx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+            o.start(); o.stop(ctx.currentTime + 0.25);
+        } else if (type === 'win') {
+            [523,659,784,1047].forEach((f,i) => {
+                const oo=ctx.createOscillator(); const gg=ctx.createGain();
+                oo.connect(gg); gg.connect(ctx.destination);
+                oo.frequency.value=f; gg.gain.setValueAtTime(0.2,ctx.currentTime+i*0.1);
+                gg.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.1+0.3);
+                oo.start(ctx.currentTime+i*0.1); oo.stop(ctx.currentTime+i*0.1+0.3);
+            });
+            return;
+        }
+    } catch(e) {}
+}
+
+// ── CARD DEFINITIONS ──
+const CARD_DEFS = {
+    boom:      { emoji:'💣', name:'BOOM',    cls:'boom',      desc:'Eliminated! Unless you have a Defuse card to save yourself.' },
+    defuse:    { emoji:'🛡️', name:'DEFUSE',  cls:'defuse',    desc:'Cancels a BOOM when drawn. You get to reinsert the bomb anywhere in the deck.' },
+    peek:      { emoji:'👁️', name:'PEEK',    cls:'peek',      desc:'Secretly look at the top 3 cards of the draw pile. Know what\'s coming.' },
+    shuffle:   { emoji:'🔀', name:'SHUFFLE', cls:'shuffle',   desc:'Randomize the entire deck. Great for disrupting what others Peeked at.' },
+    skip:      { emoji:'⏭️', name:'SKIP',    cls:'skip',      desc:'End your turn immediately — no drawing required. Avoid that bomb!' },
+    reverse:   { emoji:'🔁', name:'REVERSE', cls:'reverse',   desc:'Flip the turn order. Clockwise becomes counter-clockwise and vice versa.' },
+    blast:     { emoji:'💥', name:'BLAST',   cls:'blast',     desc:'Target player must draw 2 cards from the pile. Double with Arsenal Combo!' },
+    snatch:    { emoji:'🤲', name:'SNATCH',  cls:'snatch',    desc:'Steal a random card from another player\'s hand. Could be a Defuse!' },
+    lock:      { emoji:'🔒', name:'LOCK',    cls:'lock',      desc:'Target player cannot play any cards on their next turn. Very nasty.' },
+    wild:      { emoji:'🃏', name:'WILD',    cls:'wild',      desc:'Copies the last card that was played. If nothing\'s been played, it fizzles.' },
+    chaos:     { emoji:'🌪️', name:'CHAOS',   cls:'chaos',     desc:'Everyone passes their entire hand one seat to the left. Total mayhem.' },
+    surge_card:{ emoji:'✨', name:'SURGE',   cls:'surge-card',desc:'Play this to earn +2 extra draft picks at the start of the next round.' }
+};
+
+const AVATARS = ['😊','🐯','🦊','🐱','🐸','🦁','🐼','🤖','👾','🐙'];
+
+// ── GAME STATE ──
+let G = {};
+
+function resetG() {
+    G = {
+        mode: 'classic',
+        players: [],
+        deck: [],
+        discard: [],
+        turn: 0,
+        direction: 1,
+        round: 1,
+        active: false,
+        gameOver: false,
+        lastCard: null,
+        pendingDraws: 0,
+        draftQueue: [],
+        draftPlayerIdx: 0,
+        stats: { rounds: 0, cardsPlayed: 0, bombsDefused: 0 }
+    };
+}
+
+// ── DECK BUILDER ──
+function buildDeck(playerCount, mode) {
+    const deck = [];
+    const booms = playerCount - 1;
+    const defuses = playerCount + 1;
+    for (let i = 0; i < booms; i++) deck.push('boom');
+    for (let i = 0; i < defuses; i++) deck.push('defuse');
+    const actionCounts = { peek:4, shuffle:3, skip:4, reverse:3, blast:4, snatch:3, lock:3, wild:3, chaos:2 };
+    if (mode === 'surge') actionCounts.surge_card = 3;
+    for (const [type, count] of Object.entries(actionCounts)) {
+        for (let i = 0; i < count; i++) deck.push(type);
+    }
+    return shuffle(deck);
+}
+
+function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+function dealInitialHands() {
+    // Pull booms out of deck before dealing — they must never land in a starting hand
+    const booms = [];
+    G.deck = G.deck.filter(c => { if (c === 'boom') { booms.push(c); return false; } return true; });
+
+    G.players.forEach(p => {
+        p.hand = [];
+        p.hand.push('defuse'); // everyone starts with a defuse
+        for (let i = 0; i < 4; i++) {
+            if (G.deck.length) {
+                const card = G.deck.pop();
+                if (card) p.hand.push(card); // guard against undefined
+            }
+        }
+    });
+
+    // Reinsert booms into deck randomly, then remove any extra defuses from deck
+    // (each player already has one; remaining deck defuses are fine)
+    booms.forEach(b => {
+        const pos = Math.floor(Math.random() * (G.deck.length + 1));
+        G.deck.splice(pos, 0, b);
+    });
+}
+
+// ── SCREENS ──
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+}
+
+function setHeaderVisible(visible) {
+    const h = document.getElementById('game-header');
+    h.classList.toggle('on-menu', !visible);
+}
+
+// ── MODE SELECT ──
+document.querySelectorAll('.mode-card').forEach(c => {
+    c.addEventListener('click', () => {
+        G.mode = c.dataset.mode;
+        showSetup();
+    });
+});
+
+function showSetup() {
+    resetG();
+    G.mode = G.mode || 'classic';
+    // Reset AI state
+    aiCount = 0; aiLevel = 'easy'; aiOn = false;
+    document.getElementById('ai-toggle-switch').classList.remove('on');
+    document.getElementById('ai-options-row').style.display = 'none';
+    document.getElementById('ai-tog-off-label').style.opacity = '1';
+    document.getElementById('ai-tog-on-label').style.opacity = '0.4';
+    document.getElementById('ai-sub-label').textContent = 'Off — all human players';
+    document.getElementById('ai-count-row').innerHTML = '';
+    document.getElementById('ai-count-max-hint').textContent = '';
+    document.querySelectorAll('.diff-opt').forEach(b => b.classList.toggle('active', b.dataset.diff === 'easy'));
+    document.getElementById('setup-mode-name').textContent = G.mode.toUpperCase();
+    document.getElementById('surge-info-section').style.display = G.mode === 'surge' ? 'block' : 'none';
+    setHeaderVisible(false);
+    buildPlayerList(2);
+    showScreen('screen-setup');
+    updatePill();
+}
+
+// Player count buttons
+document.querySelectorAll('.pc-btn').forEach(b => {
+    b.addEventListener('click', () => {
+        document.querySelectorAll('.pc-btn').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        const count = parseInt(b.dataset.count);
+        if (aiOn) renderAICountBtns(count);
+        buildPlayerList(count);
+    });
+});
+
+// AI setup state
+let aiCount = 0;
+let aiLevel = 'easy';
+let aiOn = false;
+
+const aiSwitch = document.getElementById('ai-toggle-switch');
+const aiOptionsRow = document.getElementById('ai-options-row');
+const aiOffLabel = document.getElementById('ai-tog-off-label');
+const aiOnLabel = document.getElementById('ai-tog-on-label');
+
+aiSwitch.addEventListener('click', () => {
+    aiOn = !aiOn;
+    aiSwitch.classList.toggle('on', aiOn);
+    aiOffLabel.style.opacity = aiOn ? '0.4' : '1';
+    aiOnLabel.style.opacity = aiOn ? '1' : '0.4';
+    if (aiOn) {
+        aiCount = 1;
+        aiOptionsRow.style.display = 'flex';
+        renderAICountBtns(getPlayerCount());
+        document.getElementById('ai-sub-label').textContent = '1 AI seat — fills last slot';
+    } else {
+        aiCount = 0;
+        aiOptionsRow.style.display = 'none';
+        document.getElementById('ai-sub-label').textContent = 'Off — all human players';
+    }
+    buildPlayerList(getPlayerCount());
+});
+
+// Render AI count buttons dynamically based on player count
+function renderAICountBtns(totalPlayers) {
+    const row = document.getElementById('ai-count-row');
+    const hint = document.getElementById('ai-count-max-hint');
+    const max = totalPlayers - 1; // always keep at least 1 human
+    hint.textContent = `(max ${max})`;
+    row.innerHTML = '';
+    // Clamp current aiCount to new max
+    if (aiCount > max) aiCount = max;
+    for (let i = 1; i <= max; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'ai-count-btn' + (i === aiCount ? ' active' : '');
+        btn.dataset.count = i;
+        btn.textContent = i;
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.ai-count-btn').forEach(x => x.classList.remove('active'));
+            btn.classList.add('active');
+            aiCount = i;
+            const s = aiCount > 1 ? 's' : '';
+            document.getElementById('ai-sub-label').textContent = `${aiCount} AI seat${s} — fills last ${aiCount} slot${s}`;
+            buildPlayerList(getPlayerCount());
+        });
+        row.appendChild(btn);
+    }
+}
+
+document.querySelectorAll('.diff-opt').forEach(b => {
+    b.addEventListener('click', () => {
+        document.querySelectorAll('.diff-opt').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        aiLevel = b.dataset.diff;
+    });
+});
+
+function getPlayerCount() {
+    return parseInt(document.querySelector('.pc-btn.active').dataset.count);
+}
+
+function buildPlayerList(count) {
+    const list = document.getElementById('player-list');
+    list.innerHTML = '';
+    const existingPlayers = G.players || [];
+    G.players = [];
+    // Clamp aiCount so we always have at least 1 human
+    const effectiveAI = Math.min(aiCount, count - 1);
+    let aiIdx = 0; // counts how many AI players we've placed
+    for (let i = 0; i < count; i++) {
+        const isAI = effectiveAI > 0 && i >= count - effectiveAI;
+        const existing = existingPlayers[i];
+        const avatar = existing?.avatar || AVATARS[i];
+        const aiName = isAI ? `AI ${++aiIdx}` : null;
+        const name = existing?.name || (isAI ? aiName : `Player ${i + 1}`);
+        G.players.push({ name, avatar, hand: [], eliminated: false, isAI, lockedOut: false, id: i });
+        const row = document.createElement('div');
+        row.className = 'player-row';
+        row.innerHTML = `
+            <span class="player-avatar" title="Change avatar" data-idx="${i}">${avatar}</span>
+            <input class="player-name-input" placeholder="Player ${i+1} name" value="${isAI ? aiName : name}" data-idx="${i}" ${isAI?'readonly':''}>
+            ${isAI ? '<span class="player-ai-badge">AI</span>' : ''}
+        `;
+        list.appendChild(row);
+    }
+    list.querySelectorAll('.player-avatar').forEach(av => {
+        av.addEventListener('click', () => {
+            const idx = parseInt(av.dataset.idx);
+            const cur = AVATARS.indexOf(G.players[idx].avatar);
+            G.players[idx].avatar = AVATARS[(cur+1) % AVATARS.length];
+            av.textContent = G.players[idx].avatar;
+        });
+    });
+    list.querySelectorAll('.player-name-input').forEach(inp => {
+        inp.addEventListener('input', () => {
+            G.players[parseInt(inp.dataset.idx)].name = inp.value || `Player ${parseInt(inp.dataset.idx)+1}`;
+        });
+    });
+}
+
+document.getElementById('setup-back-btn').addEventListener('click', () => {
+    showScreen('screen-mode');
+    setHeaderVisible(false);
+});
+
+document.getElementById('start-btn').addEventListener('click', startGame);
+
+function startGame() {
+    // Sync names
+    document.querySelectorAll('.player-name-input').forEach(inp => {
+        G.players[parseInt(inp.dataset.idx)].name = inp.value.trim() || `Player ${parseInt(inp.dataset.idx)+1}`;
+    });
+    G.deck = buildDeck(G.players.length, G.mode);
+    G.discard = [];
+    G.turn = 0;
+    G.direction = 1;
+    G.round = 1;
+    G.active = true;
+    G.gameOver = false;
+    G.lastCard = null;
+    G.pendingDraws = 0;
+    G.stats = { rounds: 0, cardsPlayed: 0, bombsDefused: 0 };
+
+    dealInitialHands();
+    setHeaderVisible(true);
+    updateModeUI();
+
+    // Surge: kick off draft before first turn
+    if (G.mode === 'surge') {
+        beginDraftPhase();
+    } else {
+        beginPassPhase();
+    }
+}
+
+function updateModeUI() {
+    const pill = document.getElementById('hdr-mode-pill');
+    pill.textContent = G.mode.toUpperCase();
+    pill.className = 'hdr-mode-pill ' + G.mode;
+}
+
+// ── PASS PHASE ──
+function beginPassPhase() {
+    const p = currentPlayer();
+    hideAIBanner();
+
+    if (p.isAI) {
+        showGameScreen();
+        setTimeout(doAITurn, 400);
+        return;
+    }
+
+    const humanCount = G.players.filter(pl => !pl.isAI).length;
+    if (humanCount <= 1) {
+        // Solo vs AI — no pass screen needed, go straight to game
+        showGameScreen();
+        return;
+    }
+
+    document.getElementById('pass-player-name').textContent = `${p.avatar} ${p.name}`;
+    document.getElementById('pass-reveal-btn').textContent = "PASS & REVEAL →";
+    showScreen('screen-pass');
+}
+
+document.getElementById('pass-reveal-btn').addEventListener('click', () => {
+    showGameScreen();
+});
+
+function showGameScreen() {
+    showScreen('screen-game');
+    renderGame();
+}
+
+// ── SURGE DRAFT PHASE ──
+function beginDraftPhase() {
+    G.draftQueue = G.players.filter(p => !p.eliminated).map(p => p.id);
+    G.draftPlayerIdx = 0;
+    showNextDraft();
+}
+
+function showNextDraft() {
+    if (G.draftPlayerIdx >= G.draftQueue.length) {
+        beginPassPhase();
+        return;
+    }
+    const pid = G.draftQueue[G.draftPlayerIdx];
+    const player = G.players[pid];
+    document.getElementById('draft-sub').textContent = `Round ${G.round} — pick 1 card to add to your deck`;
+    document.getElementById('draft-player-info').innerHTML = `Drafting for <b>${player.avatar} ${player.name}</b>`;
+    // Build 3 draft options (exclude boom)
+    const options = ['peek','shuffle','skip','reverse','blast','snatch','lock','wild','chaos'];
+    const pool = shuffle(options).slice(0, 3);
+    const poolEl = document.getElementById('draft-pool');
+    poolEl.innerHTML = '';
+    pool.forEach(type => {
+        const slot = document.createElement('div');
+        slot.className = 'draft-card-slot';
+        slot.innerHTML = renderCardHTML(type);
+        slot.addEventListener('click', () => {
+            if (player.isAI) return;
+            player.hand.push(type);
+            G.draftPlayerIdx++;
+            showNextDraft();
+        });
+        attachTooltip(slot, type);
+        poolEl.appendChild(slot);
+    });
+    // AI auto-picks
+    if (player.isAI) {
+        setTimeout(() => {
+            player.hand.push(pool[Math.floor(Math.random()*pool.length)]);
+            G.draftPlayerIdx++;
+            showNextDraft();
+        }, 500);
+    }
+    showScreen('screen-draft');
+}
+
+document.getElementById('draft-skip-btn').addEventListener('click', () => {
+    G.draftPlayerIdx++;
+    showNextDraft();
+});
+
+// ── RENDER CARD ──
+function renderCardHTML(type, selected=false, idx=null) {
+    const def = CARD_DEFS[type] || CARD_DEFS.boom;
+    return `
+    <div class="play-card ${selected?'selected':''}" data-type="${type}" data-idx="${idx??''}">
+        <div class="card-face ${def.cls}">
+            <span class="card-corner tl">${def.emoji}</span>
+            <span class="card-emoji">${def.emoji}</span>
+            <div class="card-type-name">${def.name}</div>
+            <span class="card-corner br">${def.emoji}</span>
+        </div>
+    </div>`;
+}
+
+function renderSmallCard(type) {
+    const def = CARD_DEFS[type] || CARD_DEFS.boom;
+    return `<div class="peek-card-mini card-face ${def.cls}"><div class="peek-emoji">${def.emoji}</div><div style="font-family:'Bangers',cursive;font-size:0.6rem;letter-spacing:0.04em">${def.name}</div></div>`;
+}
+
+// ── GAME RENDER ──
+function currentPlayer() {
+    return G.players[G.turn];
+}
+
+function livePlayers() {
+    return G.players.filter(p => !p.eliminated);
+}
+
+function renderGame() {
+    const p = currentPlayer();
+    document.getElementById('turn-avatar').textContent = p.avatar;
+    document.getElementById('turn-name').textContent = p.name;
+    document.getElementById('deck-count').textContent = G.deck.length;
+    document.getElementById('round-count').textContent = G.round;
+    const drawEl = document.getElementById('draw-pile');
+    document.getElementById('draw-pile-count').textContent = `${G.deck.length} card${G.deck.length!==1?'s':''}`;
+    // Escalating danger glow as deck shrinks
+    drawEl.classList.remove('danger', 'danger-mid', 'danger-low');
+    if (G.deck.length <= 3) drawEl.classList.add('danger');
+    else if (G.deck.length <= 8) drawEl.classList.add('danger-mid');
+    else if (G.deck.length <= 14) drawEl.classList.add('danger-low');
+
+    // Reset AI thinking UI when re-rendering
+    setAIThinking(p.isAI);
+
+    // Discard top
+    const dt = document.getElementById('discard-top');
+    const discardPileEl = document.getElementById('discard-pile');
+    if (G.discard.length) {
+        const last = G.discard[G.discard.length-1];
+        const def = CARD_DEFS[last];
+        dt.innerHTML = `<div class="card-face ${def.cls}" style="width:100%;height:100%;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:2rem;">${def.emoji}</div>`;
+        // Tooltip on the discard pile
+        discardPileEl.style.cursor = 'help';
+        discardPileEl.onmouseenter = () => showTooltip(discardPileEl, last);
+        discardPileEl.onmouseleave = () => hideTooltip();
+    } else {
+        dt.innerHTML = '<span style="font-size:2rem;opacity:0.2">✕</span>';
+        discardPileEl.style.cursor = '';
+        discardPileEl.onmouseenter = null;
+        discardPileEl.onmouseleave = null;
+    }
+
+    // Players row
+    const pr = document.getElementById('players-row');
+    pr.innerHTML = G.players.map((pl,i) => `
+        <div class="player-token ${i===G.turn?'active':''} ${pl.eliminated?'eliminated':''} ${pl.lockedOut?'locked-out':''}">
+            <span class="pt-av">${pl.avatar}</span>
+            <span class="pt-name">${pl.name.length>8?pl.name.slice(0,7)+'…':pl.name}</span>
+            <span class="pt-cards">(${pl.hand.length})</span>
+            ${pl.isAI ? '<span style="font-size:0.42rem;opacity:0.5;letter-spacing:0.1em;font-family:Nunito,sans-serif;">AI</span>' : ''}
+        </div>
+    `).join('');
+
+    // Hand — disable interaction during AI turn
+    renderHand(!p.isAI);
+
+    // Action row — disable during AI turn
+    const skipBtn = document.getElementById('skip-action-btn');
+    const drawBtn = document.getElementById('draw-action-btn');
+    const sortBtn = document.getElementById('sort-action-btn');
+    if (p.isAI) {
+        skipBtn.disabled = true;
+        drawBtn.disabled = true;
+        sortBtn.disabled = true;
+    } else {
+        const locked = p.lockedOut;
+        const hasSkipCard = p.hand.includes('skip');
+        skipBtn.disabled = locked || !hasSkipCard;
+        skipBtn.title = hasSkipCard ? 'Play your SKIP card to end turn without drawing' : 'No SKIP card in hand';
+        drawBtn.disabled = false;
+        sortBtn.disabled = false;
+    }
+
+    // Arsenal combo hint
+    const comboHint = document.getElementById('combo-hint');
+    if (G.mode === 'arsenal' && !p.isAI) {
+        comboHint.style.display = 'block';
+        comboHint.textContent = `⚡ Arsenal: Select 2 matching cards for a double effect! Hand limit: ${p.hand.length}/7`;
+    } else {
+        comboHint.style.display = 'none';
+    }
+}
+
+let selectedCardIdx = null;
+let comboCardIdx = null;
+let skipDealAnim = false; // true when re-rendering without a new turn (reorder, sort, select)
+
+function renderHand(interactive=true) {
+    const p = currentPlayer();
+    if (handIsSorted && interactive) {
+        p.hand.sort((a, b) => SORT_ORDER.indexOf(a) - SORT_ORDER.indexOf(b));
+    }
+    const scroll = document.getElementById('hand-scroll');
+    Array.from(scroll.children).forEach(c => { if (c !== insertLine) c.remove(); });
+    scroll.insertBefore(insertLine, null);
+
+    p.hand.forEach((type, idx) => {
+        const card = document.createElement('div');
+        const def = CARD_DEFS[type];
+        card.className = 'play-card';
+        const tilt = ((idx % 3) - 1) * 1.5 + (idx % 2 === 0 ? 0.5 : -0.5);
+        card.style.transform = `rotate(${tilt}deg)`;
+        card.dataset.handidx = idx;
+
+        if (!interactive) {
+            card.style.cursor = 'default';
+            card.innerHTML = `<div style="width:100%;height:100%;border-radius:8px;background:linear-gradient(135deg,#2a1a5e,#1a1040);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+                <svg viewBox="0 0 90 126" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%;border-radius:8px;">
+                    <defs><pattern id="fcp" x="0" y="0" width="14" height="14" patternUnits="userSpaceOnUse"><path d="M7 0 L14 7 L7 14 L0 7 Z" fill="none" stroke="rgba(155,93,229,0.2)" stroke-width="0.8"/></pattern></defs>
+                    <rect width="90" height="126" rx="8" fill="url(#fcp)"/>
+                    <rect x="4" y="4" width="82" height="118" rx="6" fill="none" stroke="rgba(155,93,229,0.3)" stroke-width="1"/>
+                    <text x="45" y="56" text-anchor="middle" font-family="Bangers,cursive" font-size="18" fill="rgba(155,93,229,0.5)">MAY</text>
+                    <text x="45" y="76" text-anchor="middle" font-family="Bangers,cursive" font-size="18" fill="rgba(255,229,59,0.5)">HEM</text>
+                </svg>
+            </div>`;
+        } else {
+            card.innerHTML = `<div class="card-face ${def.cls}">
+                <span class="card-corner tl">${def.emoji}</span>
+                <span class="card-emoji">${def.emoji}</span>
+                <div class="card-type-name">${def.name}</div>
+                <span class="card-corner br">${def.emoji}</span>
+            </div>`;
+            if (selectedCardIdx === idx) card.classList.add('selected');
+            if (comboCardIdx === idx) card.classList.add('combo-selected');
+            card.addEventListener('click', (e) => {
+                if (e._suppressedByDrag) return;
+                onCardClick(idx);
+            });
+            attachTooltip(card, type);
+            initDragReorder(card, idx);
+            // Only animate on turn entry, not on reorder/sort/selection changes
+            if (!skipDealAnim) {
+                card.style.animationDelay = `${idx * 45}ms`;
+                card.classList.add('deal-in');
+            }
+        }
+        scroll.insertBefore(card, insertLine);
+    });
+    skipDealAnim = false; // reset after use
+}
+
+// Context info for certain cards when selected
+const CARD_CONTEXT = {
+    wild: () => {
+        if (!G.lastCard || G.lastCard === 'wild') return { msg: '⚠️ No previous card to copy — Wild will fizzle!', color: 'var(--red)', warn: true };
+        const def = CARD_DEFS[G.lastCard];
+        return { msg: `Will copy: ${def?.emoji || ''} ${def?.name || G.lastCard}`, color: 'var(--cyan)', warn: false };
+    },
+    defuse: () => ({ msg: '🛡️ Only playable when you draw a BOOM — cannot play from hand', color: 'var(--dim)', warn: true }),
+    peek:   () => ({ msg: `👁️ You'll see the top ${Math.min(3, G.deck.length)} cards of the draw pile`, color: 'var(--yellow)', warn: false }),
+    chaos:  () => ({ msg: '🌪️ Everyone passes their ENTIRE hand left — including yours!', color: 'var(--orange)', warn: false }),
+    snatch: () => ({ msg: `🤲 Steal a random card — could grab their Defuse!`, color: 'var(--cyan)', warn: false }),
+};
+
+function showCardContext(type) {
+    const strip = document.getElementById('card-context-strip');
+    if (!strip) return;
+    const fn = CARD_CONTEXT[type];
+    if (!fn) { strip.style.display = 'none'; return; }
+    const { msg, color, warn } = fn();
+    strip.style.display = 'block';
+    strip.style.color = color;
+    strip.style.background = warn ? 'rgba(255,60,60,0.08)' : 'rgba(0,0,0,0.15)';
+    strip.textContent = msg;
+}
+
+function hideCardContext() {
+    const strip = document.getElementById('card-context-strip');
+    if (strip) strip.style.display = 'none';
+}
+
+function onCardClick(idx) {
+    const p = currentPlayer();
+    if (p.lockedOut || p.isAI) return;
+    const type = p.hand[idx];
+    if (type === 'boom') return;
+    if (type === 'defuse') { showCardContext('defuse'); selectedCardIdx = null; skipDealAnim = true; renderHand(); return; }
+
+    if (G.mode === 'arsenal' && selectedCardIdx !== null && selectedCardIdx !== idx && p.hand[selectedCardIdx] === type) {
+        comboCardIdx = idx;
+        hideCardContext();
+        skipDealAnim = true;
+        renderHand();
+        setTimeout(() => playComboCard(selectedCardIdx, idx), 300);
+        return;
+    }
+
+    if (selectedCardIdx === idx) {
+        // Second tap — check for wild fizzle warning
+        if (type === 'wild' && (!G.lastCard || G.lastCard === 'wild')) {
+            showCardContext('wild');
+            setTimeout(() => hideCardContext(), 2000);
+            return;
+        }
+        hideCardContext();
+        playCard(idx);
+        selectedCardIdx = null;
+        comboCardIdx = null;
+    } else {
+        selectedCardIdx = idx;
+        comboCardIdx = null;
+        showCardContext(type);
+        skipDealAnim = true;
+        renderHand();
+    }
+}
+
+// ── CARD FLIGHT ANIMATION ──
+function flyCard(fromEl, toEl, cardType, onComplete) {
+    const flight = document.getElementById('card-flight');
+    const def = CARD_DEFS[cardType] || {};
+
+    const fromRect = fromEl ? fromEl.getBoundingClientRect() : { left: window.innerWidth/2 - 43, top: window.innerHeight/2 - 60, width: 86, height: 120 };
+    const toRect = toEl ? toEl.getBoundingClientRect() : { left: window.innerWidth/2 - 43, top: window.innerHeight/2 - 60, width: 86, height: 120 };
+
+    // Build card face or back
+    const isBack = !def.cls;
+    flight.innerHTML = isBack
+        ? `<svg viewBox="0 0 90 126" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;border-radius:10px;"><rect width="90" height="126" rx="10" fill="#2a1a5e"/><text x="45" y="56" text-anchor="middle" font-family="Bangers,cursive" font-size="18" fill="rgba(155,93,229,0.7)">MAY</text><text x="45" y="76" text-anchor="middle" font-family="Bangers,cursive" font-size="18" fill="rgba(255,229,59,0.7)">HEM</text></svg>`
+        : `<div class="card-face ${def.cls}" style="width:100%;height:100%;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:2rem;">${def.emoji}</div>`;
+
+    flight.style.cssText = `
+        position: fixed; z-index: 3000; pointer-events: none;
+        width: 86px; height: 120px; border-radius: 10px;
+        left: ${fromRect.left + fromRect.width/2 - 43}px;
+        top: ${fromRect.top + fromRect.height/2 - 60}px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+        transition: left 0.32s cubic-bezier(0.22,1,0.36,1),
+                    top 0.32s cubic-bezier(0.22,1,0.36,1),
+                    transform 0.32s cubic-bezier(0.22,1,0.36,1),
+                    opacity 0.12s ease 0.22s;
+        transform: scale(1.1) rotate(-8deg);
+        opacity: 1;
+        display: block;
+    `;
+
+    // Force reflow then animate to destination
+    flight.offsetHeight;
+    const destLeft = toRect.left + toRect.width/2 - 43;
+    const destTop  = toRect.top  + toRect.height/2 - 60;
+    flight.style.left = destLeft + 'px';
+    flight.style.top  = destTop  + 'px';
+    flight.style.transform = 'scale(0.85) rotate(5deg)';
+    flight.style.opacity = '0';
+
+    setTimeout(() => {
+        flight.style.display = 'none';
+        if (onComplete) onComplete();
+    }, 340);
+}
+
+// ── CARD PLAY ──
+function playCard(idx, isCombo=false) {
+    const p = currentPlayer();
+    const type = p.hand[idx];
+
+    // Animate card from hand to discard pile
+    const scroll = document.getElementById('hand-scroll');
+    const cards = Array.from(scroll.querySelectorAll('.play-card'));
+    const fromEl = cards[idx] || null;
+    const toEl = document.getElementById('discard-pile');
+
+    const doPlay = () => {
+        p.hand.splice(idx, 1);
+        if (isCombo !== false) {
+            const comboReal = isCombo > idx ? isCombo - 1 : isCombo;
+            p.hand.splice(comboReal, 1);
+        }
+        G.discard.push(type);
+        G.lastCard = type;
+        G.stats.cardsPlayed++;
+        selectedCardIdx = null;
+        comboCardIdx = null;
+        playSound('play');
+        resolveCard(type, false);
+    };
+
+    if (fromEl && toEl) {
+        flyCard(fromEl, toEl, type, doPlay);
+    } else {
+        doPlay();
+    }
+}
+
+function playComboCard(idx1, idx2) {
+    const p = currentPlayer();
+    const type = p.hand[idx1];
+    const scroll = document.getElementById('hand-scroll');
+    const cards = Array.from(scroll.querySelectorAll('.play-card'));
+    const fromEl = cards[idx1] || null;
+    const toEl = document.getElementById('discard-pile');
+
+    const doCombo = () => {
+        const higher = Math.max(idx1,idx2);
+        const lower = Math.min(idx1,idx2);
+        p.hand.splice(higher, 1);
+        p.hand.splice(lower, 1);
+        G.discard.push(type);
+        G.discard.push(type);
+        G.lastCard = type;
+        G.stats.cardsPlayed += 2;
+        selectedCardIdx = null; comboCardIdx = null;
+        playSound('play');
+        resolveCard(type, true);
+    };
+
+    if (fromEl && toEl) {
+        flyCard(fromEl, toEl, type, doCombo);
+    } else {
+        doCombo();
+    }
+}
+
+function resolveCard(type, isCombo) {
+    const p = currentPlayer();
+    const multiplier = isCombo ? 2 : 1;
+    const isAI = p.isAI;
+
+    switch(type) {
+        case 'peek':
+            if (isAI) {
+                // AI peeks silently — no modal shown to human
+                showEffect('👁️ PEEK!', `${p.name} looks at the top cards`, '#ffe53b');
+                setTimeout(() => { if (G.active && !G.gameOver) aiDrawCard(); }, 1500);
+            } else {
+                showPeekModal();
+            }
+            break;
+        case 'shuffle':
+            // Animate draw pile wiggle before shuffling
+            const dpile = document.getElementById('draw-pile');
+            dpile.style.transition = 'transform 0.08s';
+            let sf = 0;
+            const shufInterval = setInterval(() => {
+                sf++;
+                dpile.style.transform = sf % 2 === 0 ? 'rotate(-4deg) scale(1.05)' : 'rotate(4deg) scale(1.05)';
+                if (sf >= 6) { clearInterval(shufInterval); dpile.style.transform = ''; dpile.style.transition = ''; }
+            }, 80);
+            setTimeout(() => {
+                G.deck = shuffle(G.deck);
+                showEffect('🔀 SHUFFLE!', 'Deck shuffled — new card order', '#9b5de5');
+                setTimeout(() => {
+                    if (isAI) { if (G.active && !G.gameOver) aiDrawCard(); }
+                    else renderGame();
+                }, 1500);
+            }, 500);
+            break;
+        case 'skip':
+            showEffect('⏭️ SKIP!', `${p.name} skips drawing`, '#f72585');
+            setTimeout(() => { endTurnNoDraw(); }, 1500);
+            break;
+        case 'reverse':
+            G.direction *= -1;
+            showEffect('🔁 REVERSE!', 'Turn order flipped', '#4361ee');
+            setTimeout(() => {
+                if (isAI) { if (G.active && !G.gameOver) aiDrawCard(); }
+                else renderGame();
+            }, 1500);
+            break;
+        case 'blast':
+            if (isAI) {
+                // AI picks random target silently
+                const aiTargets = G.players.filter(x => !x.eliminated && x.id !== G.turn);
+                if (aiTargets.length) {
+                    const t = aiTargets[Math.floor(Math.random() * aiTargets.length)];
+                    executeTargetAction(type, t.id, isCombo ? 4 : 2);
+                    setTimeout(() => { if (G.active) aiDrawCard(); }, 1800);
+                } else { if (G.active && !G.gameOver) aiDrawCard(); }
+            } else {
+                if (isCombo) showTargetModal('💥 DOUBLE BLAST!', 'Target draws 4 cards', type, 4);
+                else showTargetModal('💥 BLAST!', 'Target draws 2 cards from the pile', type, 2);
+            }
+            break;
+        case 'snatch':
+            if (isAI) {
+                const aiTargets = G.players.filter(x => !x.eliminated && x.id !== G.turn);
+                if (aiTargets.length) {
+                    const t = aiTargets[Math.floor(Math.random() * aiTargets.length)];
+                    executeTargetAction(type, t.id, isCombo ? 2 : 1);
+                    setTimeout(() => { if (G.active) aiDrawCard(); }, 1800);
+                } else { if (G.active && !G.gameOver) aiDrawCard(); }
+            } else {
+                if (isCombo) showTargetModal('🤲 DOUBLE SNATCH!', 'Steal 2 random cards from target', type, 2);
+                else showTargetModal('🤲 SNATCH!', 'Steal a random card from target', type, 1);
+            }
+            break;
+        case 'lock':
+            if (isAI) {
+                const aiTargets = G.players.filter(x => !x.eliminated && x.id !== G.turn);
+                if (aiTargets.length) {
+                    const t = aiTargets[Math.floor(Math.random() * aiTargets.length)];
+                    executeTargetAction(type, t.id, multiplier);
+                    setTimeout(() => { if (G.active) aiDrawCard(); }, 1800);
+                } else { if (G.active && !G.gameOver) aiDrawCard(); }
+            } else {
+                showTargetModal('🔒 LOCK!', "Target can't play cards on their next turn", type, multiplier);
+            }
+            break;
+        case 'wild':
+            if (G.lastCard && G.lastCard !== 'wild') {
+                resolveCard(G.lastCard, isCombo);
+            } else {
+                showEffect('🃏 WILD!', 'No previous card to copy', '#ffe53b');
+                setTimeout(() => {
+                    if (isAI) { if (G.active && !G.gameOver) aiDrawCard(); }
+                    else renderGame();
+                }, 1500);
+            }
+            break;
+        case 'chaos':
+            showChaosModal(); // chaos is public info — everyone's hand moved, fine to show
+            break;
+        case 'surge_card':
+            p._surgeDraftBonus = (p._surgeDraftBonus||0) + multiplier;
+            showEffect('✨ SURGE!', `+${multiplier} extra draft picks next round`, '#00f5d4');
+            setTimeout(() => {
+                if (isAI) { if (G.active && !G.gameOver) aiDrawCard(); }
+                else renderGame();
+            }, 1500);
+            break;
+        default:
+            if (!isAI) renderGame();
+    }
+}
+
+// ── EFFECT OVERLAY ──
+let effectTimer = null;
+function showEffect(label, sub, color, duration=1400) {
+    const ov = document.getElementById('effect-overlay');
+    const lb = document.getElementById('effect-label');
+    const sb = document.getElementById('effect-sub');
+    lb.textContent = label; lb.style.color = color||'var(--yellow)';
+    sb.textContent = sub;
+    ov.classList.add('show');
+    if (effectTimer) clearTimeout(effectTimer);
+    effectTimer = setTimeout(() => ov.classList.remove('show'), duration);
+    // Update last action bar
+    setLastAction(sub || label);
+}
+
+function setLastAction(text) {
+    const bar = document.getElementById('last-action-bar');
+    if (!bar) return;
+    bar.classList.remove('fade');
+    bar.textContent = text;
+    setTimeout(() => bar.classList.add('fade'), 3000);
+}
+
+// ── PEEK MODAL ──
+function showPeekModal() {
+    const top3 = G.deck.slice(-3).reverse();
+    const el = document.getElementById('peek-cards');
+    el.innerHTML = top3.length ? top3.map(t=>renderSmallCard(t)).join('') : '<span style="color:var(--dim);font-size:0.8rem">Deck is empty!</span>';
+    document.getElementById('peek-modal').classList.add('open');
+}
+document.getElementById('peek-modal-close').addEventListener('click', () => {
+    document.getElementById('peek-modal').classList.remove('open');
+    renderGame();
+});
+
+// ── TARGET MODAL ──
+let pendingTargetAction = null;
+function showTargetModal(title, sub, cardType, amount) {
+    document.getElementById('target-modal-title').textContent = title;
+    document.getElementById('target-modal-sub').textContent = sub;
+    const targets = document.getElementById('target-modal-targets');
+    const eligible = G.players.filter(p => !p.eliminated && p.id !== G.turn);
+    targets.innerHTML = eligible.map(p => `
+        <div class="target-btn" data-pid="${p.id}">
+            <span class="target-av">${p.avatar}</span>
+            <div class="target-info">
+                <div class="target-name">${p.name}</div>
+                <div class="target-meta">${p.hand.length} cards in hand</div>
+            </div>
+        </div>
+    `).join('');
+    targets.querySelectorAll('.target-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const pid = parseInt(btn.dataset.pid);
+            executeTargetAction(cardType, pid, amount);
+            document.getElementById('target-modal').classList.remove('open');
+        });
+    });
+    pendingTargetAction = { cardType, amount };
+    document.getElementById('target-modal').classList.add('open');
+}
+document.getElementById('target-modal-cancel').addEventListener('click', () => {
+    // Refund the card that was played
+    if (pendingTargetAction) {
+        const p = currentPlayer();
+        const type = pendingTargetAction.cardType;
+        // Remove from discard, return to hand
+        const di = G.discard.lastIndexOf(type);
+        if (di >= 0) G.discard.splice(di, 1);
+        p.hand.push(type);
+        G.stats.cardsPlayed = Math.max(0, G.stats.cardsPlayed - 1);
+        G.lastCard = G.discard.length ? G.discard[G.discard.length-1] : null;
+        pendingTargetAction = null;
+    }
+    document.getElementById('target-modal').classList.remove('open');
+    renderGame();
+});
+function executeTargetAction(cardType, pid, amount) {
+    const target = G.players[pid];
+    pendingTargetAction = null;
+    if (cardType === 'blast') {
+        for (let i = 0; i < amount; i++) {
+            if (G.deck.length) target.hand.push(G.deck.pop());
+        }
+        showEffect(`💥 BLAST x${amount}!`, `${target.name} draws ${amount} cards`, '#ff7c43');
+        setTimeout(() => renderGame(), 1500);
+    } else if (cardType === 'snatch') {
+        const stolen = [];
+        for (let i = 0; i < amount; i++) {
+            if (target.hand.length > 0) {
+                const ri = Math.floor(Math.random()*target.hand.length);
+                stolen.push(target.hand.splice(ri,1)[0]);
+            }
+        }
+        stolen.forEach(c => currentPlayer().hand.push(c));
+        const stolenNames = stolen.map(c => CARD_DEFS[c]?.name || c).join(', ');
+        showEffect(`🤲 SNATCHED!`, `Stole ${stolenNames} from ${target.name}`, '#2ec4b6');
+        setTimeout(() => renderGame(), 1500);
+    } else if (cardType === 'lock') {
+        target.lockedOut = true;
+        showEffect(`🔒 LOCKED!`, `${target.name} can't play cards next turn`, '#6d6875');
+        setTimeout(() => renderGame(), 1500);
+    }
+}
+
+// ── CHAOS MODAL ──
+function showChaosModal() {
+    const live = livePlayers();
+    if (live.length < 2) { renderGame(); return; }
+    const result = [];
+    const firstHand = [...live[0].hand];
+    for (let i = 0; i < live.length - 1; i++) {
+        result.push(`${live[i].avatar} ${live[i].name} → ${live[i+1].avatar} ${live[i+1].name}`);
+        live[i].hand = [...live[i+1].hand];
+    }
+    result.push(`${live[live.length-1].avatar} ${live[live.length-1].name} → ${live[0].avatar} ${live[0].name}`);
+    live[live.length-1].hand = firstHand;
+    document.getElementById('chaos-result').innerHTML = result.join('<br>');
+    document.getElementById('chaos-modal').classList.add('open');
+}
+document.getElementById('chaos-modal-close').addEventListener('click', () => {
+    document.getElementById('chaos-modal').classList.remove('open');
+    showEffect('🌪️ CHAOS!', 'Hands have been passed left', '#ff7c43');
+    setTimeout(() => renderGame(), 1500);
+});
+
+// ── DRAW REVEAL ──
+function showDrawReveal(type, afterCb) {
+    const def = CARD_DEFS[type];
+    const cardEl = document.getElementById('draw-reveal-card');
+    cardEl.innerHTML = `<div class="play-card draw-reveal-card-anim" style="pointer-events:none;margin-right:0;">
+        <div class="card-face ${def.cls}">
+            <span class="card-corner tl">${def.emoji}</span>
+            <span class="card-emoji">${def.emoji}</span>
+            <div class="card-type-name">${def.name}</div>
+            <span class="card-corner br">${def.emoji}</span>
+        </div>
+    </div>`;
+    document.getElementById('draw-reveal-name').textContent = def.name;
+    document.getElementById('draw-reveal-name').style.color = 'var(--text)';
+    document.getElementById('draw-reveal-desc').textContent = def.desc;
+    const continueBtn = document.getElementById('draw-reveal-continue');
+    const humanCount = G.players.filter(p => !p.isAI).length;
+    continueBtn.textContent = humanCount <= 1 ? 'GOT IT →' : 'PASS DEVICE →';
+    continueBtn.onclick = () => {
+        document.getElementById('draw-reveal-modal').classList.remove('open');
+        afterCb();
+    };
+    document.getElementById('draw-reveal-modal').classList.add('open');
+}
+
+// ── DRAW CARD ──
+function drawCard() {
+    if (G.deck.length === 0) {
+        showEffect('EMPTY!', 'No cards left to draw', '#666');
+        setTimeout(() => advanceTurn(), 1500);
+        return;
+    }
+    const drawn = G.deck.pop();
+    playSound('draw');
+
+    if (drawn === 'boom') {
+        // Animate a face-down card flying before boom reveal
+        const fromEl = document.getElementById('draw-pile');
+        const toEl = document.getElementById('screen-game').querySelector('.hand-area');
+        flyCard(fromEl, toEl, null, () => handleBoom());
+        return;
+    }
+
+    // Animate card from draw pile to hand area
+    const fromEl = document.getElementById('draw-pile');
+    const handArea = document.getElementById('screen-game').querySelector('.hand-area');
+
+    flyCard(fromEl, handArea, drawn, () => {
+        // Add to hand after animation
+        currentPlayer().hand.push(drawn);
+
+        // Arsenal: enforce 7-card limit
+        if (G.mode === 'arsenal' && currentPlayer().hand.length > 7) {
+            const toDrop = currentPlayer().hand.findIndex(c => c !== 'boom' && c !== 'defuse');
+            if (toDrop >= 0) G.discard.push(currentPlayer().hand.splice(toDrop, 1)[0]);
+        }
+
+        // If sort is active, sort immediately so new card lands in place
+        if (handIsSorted) {
+            currentPlayer().hand.sort((a, b) => SORT_ORDER.indexOf(a) - SORT_ORDER.indexOf(b));
+        }
+
+        renderGame(); // show updated hand
+
+        // Always show the drawn card — solo uses "GOT IT", pass-and-play uses "PASS DEVICE"
+        showDrawReveal(drawn, () => advanceTurn());
+    });
+}
+
+// ── BOOM FLOW ──
+function handleBoom() {
+    const p = currentPlayer();
+    const hasDefuse = p.hand.includes('defuse');
+
+    // Shake the hand area too for drama
+    const handArea = document.getElementById('screen-game').querySelector('.hand-area');
+    if (handArea) {
+        handArea.classList.add('shake');
+        setTimeout(() => handArea.classList.remove('shake'), 500);
+    }
+
+    const boomScreen = document.getElementById('screen-boom');
+    showScreen('screen-boom');
+    document.getElementById('boom-player-name').textContent = `${p.avatar} ${p.name} drew the BOOM!`;
+
+    setTimeout(() => {
+        boomScreen.classList.add('shake');
+        setTimeout(() => boomScreen.classList.remove('shake'), 600);
+    }, 100);
+
+    playSound('boom');
+
+    if (hasDefuse) {
+        document.getElementById('boom-has-defuse').style.display = 'flex';
+        document.getElementById('boom-no-defuse').style.display = 'none';
+    } else {
+        document.getElementById('boom-has-defuse').style.display = 'none';
+        document.getElementById('boom-no-defuse').style.display = 'flex';
+    }
+}
+
+document.getElementById('boom-use-defuse-btn').addEventListener('click', () => {
+    const p = currentPlayer();
+    const defuseIdx = p.hand.indexOf('defuse');
+    p.hand.splice(defuseIdx, 1);
+    G.discard.push('defuse');
+    G.stats.bombsDefused++;
+    playSound('defuse');
+    showDefuseScreen();
+});
+
+document.getElementById('boom-elim-continue-btn').addEventListener('click', () => {
+    const p = currentPlayer();
+    p.eliminated = true;
+    p.hand = [];
+    const live = livePlayers();
+    if (live.length <= 1) {
+        endGame();
+    } else {
+        advanceTurn();
+    }
+});
+
+// ── DEFUSE INSERT SCREEN ──
+function showDefuseScreen() {
+    const deckLen = G.deck.length;
+    document.getElementById('defuse-deck-count').textContent = deckLen;
+    const insertRow = document.getElementById('defuse-insert-row');
+    insertRow.innerHTML = '';
+    const positions = [
+        { label: '⚡ Danger — Top', pos: deckLen, hint: 'Next card drawn' },
+        { label: '↕️ Middle', pos: Math.floor(deckLen / 2), hint: 'Somewhere in the middle' },
+        { label: '✅ Safe — Bottom', pos: 0, hint: 'Last card drawn' },
+        { label: '🎲 Random', pos: -1, hint: 'Surprise everyone' }
+    ];
+    const seen = new Set();
+    positions.forEach(({ label, pos, hint }) => {
+        const key = pos < 0 ? 'random' : pos;
+        if (seen.has(key)) return;
+        seen.add(key);
+        const btn = document.createElement('button');
+        btn.className = 'insert-btn';
+        btn.innerHTML = `<div>${label}</div><div style="font-size:0.52rem;opacity:0.6;font-family:'Nunito',sans-serif;font-weight:600;margin-top:2px;letter-spacing:0.04em;">${hint}</div>`;
+        btn.style.display = 'flex'; btn.style.flexDirection = 'column'; btn.style.alignItems = 'center';
+        btn.addEventListener('click', () => {
+            const insertPos = pos < 0 ? Math.floor(Math.random() * (G.deck.length + 1)) : Math.min(pos, G.deck.length);
+            G.deck.splice(insertPos, 0, 'boom');
+            showEffect('🛡️ DEFUSED!', 'Bomb reinserted — good luck to everyone!', '#00f5d4');
+            setTimeout(() => advanceTurn(), 1600);
+        });
+        insertRow.appendChild(btn);
+    });
+    showScreen('screen-defuse');
+}
+
+// ── DRAW & SKIP & SORT BUTTONS ──
+document.getElementById('draw-action-btn').addEventListener('click', drawCard);
+document.getElementById('skip-action-btn').addEventListener('click', () => {
+    const p = currentPlayer();
+    const idx = p.hand.indexOf('skip');
+    if (idx < 0) return;
+    p.hand.splice(idx, 1);
+    G.discard.push('skip');
+    G.lastCard = 'skip';
+    playSound('play');
+    showEffect('⏭️ SKIP!', `${p.name} skips drawing — turn ends`, '#f72585');
+    setTimeout(() => endTurnNoDraw(), 1500);
+});
+
+// Sort hand by card type priority
+const SORT_ORDER = ['defuse','peek','shuffle','skip','reverse','wild','blast','snatch','lock','chaos','surge_card','boom'];
+let handIsSorted = false;
+
+function setSortActive(active) {
+    handIsSorted = active;
+    document.getElementById('sort-action-btn').classList.toggle('sort-active', active);
+}
+
+document.getElementById('sort-action-btn').addEventListener('click', () => {
+    const p = currentPlayer();
+    p.hand.sort((a, b) => SORT_ORDER.indexOf(a) - SORT_ORDER.indexOf(b));
+    selectedCardIdx = null; comboCardIdx = null;
+    setSortActive(true);
+    skipDealAnim = true;
+    renderHand();
+});
+
+// ── DRAG TO REORDER HAND ──
+let dragState = null;
+const DRAG_THRESHOLD = 8;
+
+// Insertion line element (shown between cards during drag)
+const insertLine = document.createElement('div');
+insertLine.style.cssText = `
+    width: 28px; min-width: 28px; height: 100%;
+    flex-shrink: 0; display: none; align-self: stretch;
+    position: relative; pointer-events: none; margin: 0 -8px;
+`;
+// Inner glow bar
+insertLine.innerHTML = `
+    <div style="
+        position: absolute; left: 50%; top: 8px; bottom: 8px;
+        width: 3px; transform: translateX(-50%);
+        background: var(--cyan);
+        box-shadow: 0 0 8px var(--cyan), 0 0 20px rgba(0,245,212,0.6);
+        border-radius: 2px;
+    "></div>
+    <div style="
+        position: absolute; left: 50%; top: 4px;
+        transform: translateX(-50%);
+        width: 0; height: 0;
+        border-left: 7px solid transparent;
+        border-right: 7px solid transparent;
+        border-top: 8px solid var(--cyan);
+        filter: drop-shadow(0 0 4px var(--cyan));
+    "></div>
+    <div style="
+        position: absolute; left: 50%; bottom: 4px;
+        transform: translateX(-50%);
+        width: 0; height: 0;
+        border-left: 7px solid transparent;
+        border-right: 7px solid transparent;
+        border-bottom: 8px solid var(--cyan);
+        filter: drop-shadow(0 0 4px var(--cyan));
+    "></div>
+`;
+document.getElementById('hand-scroll').appendChild(insertLine);
+
+// Single document-level handlers
+document.addEventListener('mousemove', onDragMove);
+document.addEventListener('mouseup', onDragUp);
+document.addEventListener('touchmove', e => {
+    if (dragState?.moved && e.cancelable) e.preventDefault();
+    onDragMove(e);
+}, { passive: false });
+document.addEventListener('touchend', onDragUp);
+
+function onDragMove(e) {
+    if (!dragState) return;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const dx = clientX - dragState.startX;
+    if (!dragState.moved && Math.abs(dx) < DRAG_THRESHOLD) return;
+    dragState.moved = true;
+
+    dragState.cardEl.classList.add('dragging');
+
+    // Find insertion point — cards overlap by ~20px so use left edge + small offset
+    const scroll = document.getElementById('hand-scroll');
+    const cards = Array.from(scroll.querySelectorAll('.play-card:not(.dragging)'));
+    let insertBefore = null;
+
+    for (let i = 0; i < cards.length; i++) {
+        const rect = cards[i].getBoundingClientRect();
+        // Use left edge + 30px so dragging past the first third of a card triggers insertion before it
+        if (clientX < rect.left + 30) { insertBefore = cards[i]; break; }
+    }
+
+    // Move insertion line to the right spot
+    insertLine.style.display = 'block';
+    if (insertBefore) {
+        scroll.insertBefore(insertLine, insertBefore);
+    } else {
+        scroll.appendChild(insertLine);
+    }
+    dragState.insertBefore = insertBefore;
+}
+
+function onDragUp(e) {
+    if (!dragState) return;
+    const { fromIdx, moved, cardEl, insertBefore } = dragState;
+    dragState = null;
+
+    insertLine.style.display = 'none';
+    cardEl.classList.remove('dragging');
+
+    if (moved) {
+        const p = currentPlayer();
+        const scroll = document.getElementById('hand-scroll');
+        const allCards = Array.from(scroll.querySelectorAll('.play-card:not(.dragging)'));
+
+        // Compute target index in hand array
+        let targetIdx;
+        if (!insertBefore) {
+            targetIdx = p.hand.length; // end
+        } else {
+            // insertBefore is a DOM card — find its position in the re-rendered hand
+            // We track original index via data-handidx set during renderHand
+            const targetEl = insertBefore;
+            targetIdx = parseInt(targetEl.dataset.handidx ?? allCards.indexOf(targetEl));
+        }
+
+        if (targetIdx !== fromIdx && !isNaN(targetIdx)) {
+            const [item] = p.hand.splice(fromIdx, 1);
+            const insertAt = Math.min(
+                targetIdx > fromIdx ? targetIdx - 1 : targetIdx,
+                p.hand.length
+            );
+            p.hand.splice(insertAt, 0, item);
+            setSortActive(false);
+        }
+
+        selectedCardIdx = null; comboCardIdx = null;
+        skipDealAnim = true;
+        renderHand();
+
+        // Suppress the click that fires after mouseup
+        const suppressNext = (ev) => { ev._suppressedByDrag = true; };
+        cardEl.addEventListener('click', suppressNext, { once: true, capture: true });
+    }
+}
+
+function initDragReorder(cardEl, idx) {
+    cardEl.dataset.handidx = idx;
+    function startDrag(e) {
+        // Prevent browser text-selection drag
+        if (e.type === 'mousedown') e.preventDefault();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        dragState = { fromIdx: idx, startX: clientX, startY: clientY, moved: false, cardEl, insertBefore: null };
+    }
+    cardEl.addEventListener('mousedown', startDrag);
+    cardEl.addEventListener('touchstart', startDrag, { passive: true });
+}
+
+// ── CLICK OUTSIDE TO DESELECT ──
+document.getElementById('screen-game').addEventListener('click', (e) => {
+    if (selectedCardIdx !== null && !e.target.closest('.play-card')) {
+        selectedCardIdx = null;
+        comboCardIdx = null;
+        hideCardContext();
+        skipDealAnim = true;
+        renderHand();
+    }
+});
+
+function endTurnNoDraw() {
+    selectedCardIdx = null;
+    comboCardIdx = null;
+    advanceTurn();
+}
+
+function advanceTurn() {
+    selectedCardIdx = null; comboCardIdx = null;
+    const p = currentPlayer();
+    if (p.lockedOut) p.lockedOut = false;
+
+    G.stats.rounds++;
+    const live = livePlayers();
+    if (live.length <= 1) { endGame(); return; }
+
+    // Find next alive player
+    let next = G.turn;
+    let tries = 0;
+    do {
+        next = (next + G.direction + G.players.length) % G.players.length;
+        tries++;
+        if (tries > G.players.length) break;
+    } while (G.players[next].eliminated);
+
+    // Detect round wrap: if next player's id comes before current in live order
+    const liveIds = live.map(x=>x.id);
+    const curIdx = liveIds.indexOf(G.turn);
+    const nextIdx = liveIds.indexOf(next);
+    const wrapped = G.direction === 1 ? nextIdx <= curIdx : nextIdx >= curIdx;
+    if (wrapped) {
+        G.round++;
+        if (G.mode === 'surge') {
+            G.turn = next;
+            beginDraftPhase();
+            return;
+        }
+    }
+
+    G.turn = next;
+    beginPassPhase();
+}
+
+// ── AI THINKING INDICATOR ──
+function setAIThinking(isThinking) {
+    const nameEl = document.getElementById('turn-name');
+    const labelEl = document.getElementById('turn-label');
+    if (isThinking) {
+        nameEl.classList.add('ai-thinking');
+        if (labelEl) { labelEl.textContent = 'AI Thinking…'; labelEl.classList.add('ai-turn-label'); }
+    } else {
+        nameEl.classList.remove('ai-thinking');
+        if (labelEl) { labelEl.textContent = 'Current Turn'; labelEl.classList.remove('ai-turn-label'); }
+    }
+}
+
+// ── AI ANNOUNCEMENT BANNER ──
+let aiBannerTimer = null;
+function showAIBanner(text, avatarEmoji) {
+    const banner = document.getElementById('ai-action-banner');
+    document.getElementById('ai-banner-avatar').textContent = avatarEmoji || '🤖';
+    document.getElementById('ai-banner-text').innerHTML = text;
+    banner.classList.add('show');
+    if (aiBannerTimer) clearTimeout(aiBannerTimer);
+    aiBannerTimer = setTimeout(() => banner.classList.remove('show'), 2000);
+}
+function hideAIBanner() {
+    document.getElementById('ai-action-banner').classList.remove('show');
+}
+
+// ── GAME OVER ──
+function endGame() {
+    G.active = false;
+    G.gameOver = true;
+    const winner = livePlayers()[0] || G.players[0];
+
+    // Submit score — winner's hand size as score (or round count)
+    submitScore(winner.name, 'MAYHEM', G.stats.rounds);
+
+    // Personal best (most rounds survived)
+    const _mkey = 'mayhem_pb_rounds';
+    const _mprev = parseInt(localStorage.getItem(_mkey)||'0');
+    const _misNew = G.stats.rounds > _mprev;
+    if(_misNew) localStorage.setItem(_mkey, G.stats.rounds);
+    setTimeout(()=>{ const el=document.getElementById('pb-new-badge'); if(el) el.style.display=_misNew?'block':'none'; }, 50);
+
+    // Victory screen
+    document.getElementById('victory-title').textContent = `${winner.name} WINS!`;
+    document.getElementById('victory-winner').innerHTML = `Congratulations <b>${winner.avatar} ${winner.name}</b>`;
+
+    const stats = document.getElementById('victory-stats');
+    stats.innerHTML = `
+        <div class="victory-stats-title">Game Stats</div>
+        <div class="vstat-row"><span class="vstat-label">Mode</span><span class="vstat-val">${G.mode.toUpperCase()}</span></div>
+        <div class="vstat-row"><span class="vstat-label">Rounds played</span><span class="vstat-val">${G.round}</span></div>
+        <div class="vstat-row"><span class="vstat-label">Cards played</span><span class="vstat-val">${G.stats.cardsPlayed}</span></div>
+        <div class="vstat-row"><span class="vstat-label">Bombs defused</span><span class="vstat-val">${G.stats.bombsDefused}</span></div>
+        <div class="vstat-row"><span class="vstat-label">Players</span><span class="vstat-val">${G.players.length}</span></div>
+    `;
+
+    playSound('win');
+    setHeaderVisible(false);
+    showScreen('screen-victory');
+    launchConfetti();
+}
+
+// ── AI TURN ──
+function doAITurn() {
+    const p = currentPlayer();
+    if (!p.isAI || p.eliminated || G.gameOver) return;
+
+    setAIThinking(true);
+
+    if (p.lockedOut) {
+        p.lockedOut = false;
+        showAIBanner(`<b>${p.name}</b> is locked — must draw`, p.avatar);
+        setTimeout(() => { setAIThinking(false); aiDrawCard(); }, 1200);
+        return;
+    }
+
+    const actionable = p.hand.filter(c => c !== 'boom' && c !== 'defuse');
+    const willPlay = actionable.length > 0 && Math.random() > 0.35;
+
+    if (willPlay) {
+        const toPlay = actionable[Math.floor(Math.random() * actionable.length)];
+        const def = CARD_DEFS[toPlay];
+        const idx = p.hand.indexOf(toPlay);
+        const targets = G.players.filter(x => !x.eliminated && x.id !== G.turn);
+        const target = targets[Math.floor(Math.random() * targets.length)];
+
+        // Announce what AI is playing
+        showAIBanner(`<b>${p.name}</b> plays ${def.emoji} <b>${def.name}</b>`, p.avatar);
+
+        setTimeout(() => {
+            setAIThinking(false);
+            p.hand.splice(idx, 1);
+            G.discard.push(toPlay); G.lastCard = toPlay; G.stats.cardsPlayed++;
+            playSound('play');
+            // resolveCard now handles all AI cases silently (no modals shown)
+            resolveCard(toPlay, false);
+        }, 1000);
+    } else {
+        showAIBanner(`<b>${p.name}</b> draws a card…`, p.avatar);
+        setTimeout(() => { setAIThinking(false); aiDrawCard(); }, 1000);
+    }
+}
+
+// AI draws — shows effect overlay for bomb/defuse, then advances
+function aiDrawCard() {
+    if (G.deck.length === 0) { advanceTurn(); return; }
+    const p = currentPlayer();
+    const drawn = G.deck.pop();
+    playSound('draw');
+
+    if (drawn === 'boom') {
+        const defuseIdx = p.hand.indexOf('defuse');
+        if (defuseIdx >= 0) {
+            p.hand.splice(defuseIdx, 1);
+            G.discard.push('defuse');
+            G.stats.bombsDefused++;
+            const insertPos = Math.floor(Math.random() * (G.deck.length + 1));
+            G.deck.splice(insertPos, 0, 'boom');
+            playSound('defuse');
+            showAIBanner(`<b>${p.name}</b> defused the bomb! 🛡️`, p.avatar);
+            showEffect('🛡️ DEFUSED!', `${p.name} had a Defuse card — survived!`, '#00f5d4', 1800);
+            setTimeout(() => advanceTurn(), 2000);
+        } else {
+            p.eliminated = true;
+            p.hand = [];
+            playSound('boom');
+            showAIBanner(`<b>${p.name}</b> hit a BOOM! 💣`, p.avatar);
+            showEffect('💣 BOOM!', `${p.name} is eliminated — no Defuse!`, '#ff3c3c', 1800);
+            setTimeout(() => {
+                const live = livePlayers();
+                if (live.length <= 1) endGame();
+                else advanceTurn();
+            }, 2000);
+        }
+    } else {
+        // AI drew a normal card — do NOT reveal what it was (hidden info)
+        p.hand.push(drawn);
+        if (G.mode === 'arsenal' && p.hand.length > 7) {
+            const toDrop = p.hand.findIndex(c => c !== 'boom' && c !== 'defuse');
+            if (toDrop >= 0) G.discard.push(p.hand.splice(toDrop, 1)[0]);
+        }
+        showAIBanner(`<b>${p.name}</b> drew a card`, p.avatar);
+        setTimeout(() => advanceTurn(), 1000);
+    }
+}
+
+// ── CONFETTI ──
+function launchConfetti() {
+    const canvas = document.getElementById('victory-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    const pieces = [];
+    const colors = ['#ff3c3c','#ffe53b','#9b5de5','#00f5d4','#ff7c43','#f72585','#06d6a0'];
+    for (let i=0;i<120;i++) {
+        pieces.push({
+            x: Math.random()*canvas.width, y: -20,
+            vx: (Math.random()-0.5)*4, vy: Math.random()*4+2,
+            r: Math.random()*8+4, rot: Math.random()*360, vrot: (Math.random()-0.5)*6,
+            color: colors[Math.floor(Math.random()*colors.length)], life: 1
+        });
+    }
+    function draw() {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        pieces.forEach(p => {
+            p.x+=p.vx; p.y+=p.vy; p.rot+=p.vrot; p.vy+=0.05;
+            p.life = Math.max(0, 1-(p.y/canvas.height));
+            ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
+            ctx.globalAlpha = p.life; ctx.fillStyle = p.color;
+            ctx.fillRect(-p.r/2,-p.r/2,p.r,p.r*0.6);
+            ctx.restore();
+        });
+        if (pieces.some(p=>p.y<canvas.height)) requestAnimationFrame(draw);
+    }
+    draw();
+}
+
+// ── ABANDON MODAL ──
+document.getElementById('hdr-back-btn').addEventListener('click', () => {
+    if (G.active && !G.gameOver) {
+        document.getElementById('abandon-modal').classList.add('open');
+    } else {
+        showSetup();
+    }
+});
+document.getElementById('abandon-stay').addEventListener('click', () => {
+    document.getElementById('abandon-modal').classList.remove('open');
+});
+document.getElementById('abandon-leave').addEventListener('click', () => {
+    document.getElementById('abandon-modal').classList.remove('open');
+    G.active = false;
+    setHeaderVisible(false);
+    showScreen('screen-mode');
+});
+document.getElementById('abandon-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('abandon-modal')) {
+        document.getElementById('abandon-modal').classList.remove('open');
+    }
+});
+
+// ── HELP MODAL ──
+function openHelp() {
+    const modeTitle = document.getElementById('help-mode-title');
+    const modeSteps = document.getElementById('help-mode-steps');
+    if (G.mode === 'arsenal' || !G.mode || G.mode==='classic') {
+        modeTitle.style.display = G.mode==='arsenal' ? '' : 'none';
+        modeSteps.style.display = G.mode==='arsenal' ? '' : 'none';
+        modeTitle.textContent = 'Arsenal Mode Extras';
+    } else if (G.mode === 'surge') {
+        modeTitle.style.display = '';
+        modeSteps.style.display = '';
+        modeTitle.textContent = 'Surge Mode Extras';
+        modeSteps.innerHTML = `
+            <div class="help-step"><div class="help-step-num">→</div><div class="help-step-text">Each round begins with a <b>draft phase</b> — 3 cards are revealed and each player picks 1.</div></div>
+            <div class="help-step"><div class="help-step-num">→</div><div class="help-step-text">Play <b>✨ SURGE</b> cards to get extra draft picks next round. Build the ultimate hand.</div></div>
+        `;
+    }
+    document.getElementById('help-modal').classList.add('open');
+}
+document.getElementById('help-btn').addEventListener('click', openHelp);
+document.getElementById('mode-help-btn').addEventListener('click', openHelp);
+document.getElementById('help-close').addEventListener('click', () => document.getElementById('help-modal').classList.remove('open'));
+document.getElementById('help-got-it').addEventListener('click', () => document.getElementById('help-modal').classList.remove('open'));
+document.getElementById('help-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('help-modal')) document.getElementById('help-modal').classList.remove('open');
+});
+
+// ── VICTORY BUTTONS ──
+document.getElementById('victory-play-again').addEventListener('click', () => {
+    G.active = false;
+    showSetup();
+});
+document.getElementById('victory-main-menu').addEventListener('click', () => {
+    G.active = false;
+    showScreen('screen-mode');
+    setHeaderVisible(false);
+});
+
+// ── DESKTOP HINT ──
+const hint = document.getElementById('desktop-hint');
+let hintHidden = false;
+function hideHint() {
+    if (!hintHidden) { hintHidden = true; hint.classList.add('hidden-hint'); }
+}
+setTimeout(hideHint, 9000);
+document.addEventListener('touchstart', hideHint, { once: true });
+
+// ── CARD TOOLTIP SYSTEM ──
+const tooltip = document.createElement('div');
+tooltip.className = 'card-tooltip';
+tooltip.innerHTML = '<div class="card-tooltip-name"></div><div class="card-tooltip-desc"></div>';
+document.body.appendChild(tooltip);
+
+let tooltipTimer = null;
+let tooltipVisible = false;
+const isTouchDevice = () => window.matchMedia('(hover:none) and (pointer:coarse)').matches;
+
+function showTooltip(cardEl, type) {
+    const def = CARD_DEFS[type];
+    if (!def) return;
+    tooltip.querySelector('.card-tooltip-name').textContent = `${def.emoji} ${def.name}`;
+    tooltip.querySelector('.card-tooltip-desc').textContent = def.desc;
+
+    const rect = cardEl.getBoundingClientRect();
+    const ttW = 180;
+
+    if (isTouchDevice()) {
+        // Center above the card
+        tooltip.classList.add('mobile-tip');
+        let left = rect.left + rect.width / 2 - ttW / 2;
+        left = Math.max(8, Math.min(left, window.innerWidth - ttW - 8));
+        tooltip.style.left = left + 'px';
+        tooltip.style.top = (rect.top - 12 - tooltip.offsetHeight || rect.top - 90) + 'px';
+    } else {
+        tooltip.classList.remove('mobile-tip');
+        let left = rect.left + rect.width / 2 - ttW / 2;
+        left = Math.max(8, Math.min(left, window.innerWidth - ttW - 8));
+        tooltip.style.left = left + 'px';
+        tooltip.style.top = (rect.top - 8) + 'px';
+        // Push up after measuring
+        requestAnimationFrame(() => {
+            tooltip.style.top = (rect.top - tooltip.offsetHeight - 10) + 'px';
+        });
+    }
+
+    tooltip.classList.add('visible');
+    tooltipVisible = true;
+}
+
+function hideTooltip() {
+    tooltip.classList.remove('visible');
+    tooltipVisible = false;
+    if (tooltipTimer) { clearTimeout(tooltipTimer); tooltipTimer = null; }
+}
+
+// Attach tooltip events to a card element
+function attachTooltip(el, type) {
+    if (!type || type === 'boom') return; // no tooltip for boom (everyone knows it)
+
+    // Desktop: hover after 600ms delay
+    el.addEventListener('mouseenter', () => {
+        if (isTouchDevice()) return;
+        tooltipTimer = setTimeout(() => showTooltip(el, type), 600);
+    });
+    el.addEventListener('mouseleave', () => {
+        if (isTouchDevice()) return;
+        hideTooltip();
+    });
+    el.addEventListener('mousedown', hideTooltip);
+
+    // Mobile: long press 450ms
+    let touchTimer = null;
+    el.addEventListener('touchstart', (e) => {
+        touchTimer = setTimeout(() => {
+            showTooltip(el, type);
+            // Auto-hide after 2.5s
+            setTimeout(hideTooltip, 2500);
+        }, 450);
+    }, { passive: true });
+    el.addEventListener('touchend', () => {
+        if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; }
+    });
+    el.addEventListener('touchmove', () => {
+        if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; }
+        hideTooltip();
+    });
+}
+
+// Hide tooltip on any card click
+document.getElementById('hand-scroll').addEventListener('click', hideTooltip);
+
+// ── MODE PILL UPDATE ──
+function updatePill() {
+    const pill = document.getElementById('hdr-mode-pill');
+    if (pill) { pill.textContent = (G.mode||'classic').toUpperCase(); pill.className = 'hdr-mode-pill '+(G.mode||'classic'); }
+}
+
+// Init
+resetG();
+showScreen('screen-mode');
+setHeaderVisible(false);
+</script>
+</body>
+</html>
