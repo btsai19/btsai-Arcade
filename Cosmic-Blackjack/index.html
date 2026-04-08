@@ -1370,6 +1370,7 @@ body {
     <div class="endgame-eyebrow" id="eg-eyebrow">Session Complete</div>
     <div class="endgame-title" id="eg-title">GAME OVER</div>
     <div class="endgame-summary" id="eg-summary"></div>
+    <div id="pb-new-badge" style="display:none;margin:0 0 10px;padding:5px 16px;border-radius:14px;background:rgba(255,229,102,0.1);border:1px solid rgba(255,229,102,0.35);font-size:12px;font-weight:600;letter-spacing:0.12em;color:var(--gold);text-align:center;">👑 New Personal Best!</div>
     <div class="endgame-divider"></div>
     <div class="endgame-stats" id="eg-stats"></div>
     <div class="endgame-divider"></div>
@@ -2706,6 +2707,13 @@ function showEndGame() {
   // submit top score to Supabase
   const topPlayer = sorted[0];
   submitScore(topPlayer.name, 'Cosmic Blackjack', topPlayer.chips);
+
+  // Personal best — top chip count
+  const _bjkey = 'bj_pb_chips';
+  const _bjprev = parseInt(localStorage.getItem(_bjkey)||'0');
+  const _bjisNew = topPlayer.chips > _bjprev;
+  if (_bjisNew) localStorage.setItem(_bjkey, topPlayer.chips);
+  document.getElementById('pb-new-badge').style.display = _bjisNew ? 'block' : 'none';
 
   overlay.classList.add('show');
 }
